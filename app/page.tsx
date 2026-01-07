@@ -13,8 +13,8 @@ export default async function Home() {
   return (
     <div>
       <section className="rounded bg-muted py-8 sm:py-12">
-        <div className="mx-auto grid grid-cols-1 items-center justify-items-center gap-8 px-8 sm:px-18 md:grid-cols-2">
-          <div className="max-w-md space-y-4 flex-1">
+        <div className="flex items-center justify-around gap-8 px-8 sm:px-18 flex-wrap">
+          <div className="max-w-md space-y-4">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
               Welcome to VelBuy
             </h2>
