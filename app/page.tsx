@@ -12,9 +12,9 @@ export default async function Home() {
 
   return (
     <div>
-      <section className="rounded bg-accent py-8 sm:py-12">
+      <section className="rounded bg-muted py-8 sm:py-12">
         <div className="mx-auto grid grid-cols-1 items-center justify-items-center gap-8 px-8 sm:px-18 md:grid-cols-2">
-          <div className="max-w-md space-y-4">
+          <div className="max-w-md space-y-4 flex-1">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
               Welcome to VelBuy
             </h2>
@@ -24,8 +24,8 @@ export default async function Home() {
 
             <Button
               asChild
-              value="default"
-              className="inline-flex items-center justify-center rounded-full px-6 py-3 bg-black text-white"
+              variant="secondary"
+              className="inline-flex items-center justify-center rounded-full px-6 py-3"
             >
               <Link
                 href="/products"
