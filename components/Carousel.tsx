@@ -41,7 +41,7 @@ function Carousel({ products }: CarouselProps) {
           <Image
             src={currentProduct.images[0]}
             alt={currentProduct.name}
-            layout="fill"
+            fill
             className="object-cover transition-opacity duration-500 ease-in-out"
           />
         </div>
