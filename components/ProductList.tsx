@@ -1,3 +1,5 @@
+"use client";
+
 import { Stripe } from "stripe";
 import ProductCard from "./ProductCard";
 import { Input } from "./ui/input";
@@ -12,16 +14,44 @@ import {
   PaginationPrevious,
   PaginationEllipsis,
 } from "./ui/pagination";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useTransition } from "react";
 
 interface ProductListProps {
   products: Stripe.Product[];
   currentPage: number;
   totalPages: number;
+  searchQuery: string;
 }
 
-function ProductList({ products, currentPage, totalPages }: ProductListProps) {
+function ProductList({ products, currentPage, totalPages, searchQuery }: ProductListProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [searchInput, setSearchInput] = useState(searchQuery);
+  const [isPending, startTransition] = useTransition();
+
   const createPageUrl = (page: number) => {
-    return `/products?page=${page}`;
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", page.toString());
+    return `/products?${params.toString()}`;
+  };
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (searchInput.trim()) {
+      params.set("search", searchInput.trim());
+    } else {
+      params.delete("search");
+    }
+
+    // Reset to page 1 when searching
+    params.set("page", "1");
+
+    startTransition(() => {
+      router.push(`/products?${params.toString()}`);
+    });
   };
 
   const renderPageNumbers = () => {
@@ -132,16 +162,25 @@ function ProductList({ products, currentPage, totalPages }: ProductListProps) {
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex justify-center">
-      <div className="w-96 flex flex-nowrap items-center max-w-md">
-        <Input
-          type="text"
-          placeholder="Search products..."
-          className="rounded-r-none border-r-0"
-        />
-        <Button variant="outline" className="rounded-l-none">
-          <Search className="size-4" />
-        </Button>
-      </div></div>
+        <form onSubmit={handleSearch} className="w-96 flex flex-nowrap items-center max-w-md">
+          <Input
+            type="text"
+            placeholder="Search products..."
+            className="rounded-r-none border-r-0"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            disabled={isPending}
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            className="rounded-l-none"
+            disabled={isPending}
+          >
+            <Search className="size-4" />
+          </Button>
+        </form>
+      </div>
 
       <PaginationControls />
 

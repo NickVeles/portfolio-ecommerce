@@ -2,15 +2,19 @@ import ProductList from "@/components/ProductList";
 import { getProductsPage } from "@/lib/products";
 
 interface ProductsPageProps {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; search?: string }>;
 }
 
 export default async function Products({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
+  const searchQuery = params.search || "";
 
   const { products, totalCount, totalPages, currentPage } =
-    await getProductsPage(page);
+    await getProductsPage(page, searchQuery);
+
+  // Serialize products to plain objects for Client Component
+  const serializedProducts = JSON.parse(JSON.stringify(products));
 
   return (
     <div className="space-y-8">
@@ -23,9 +27,10 @@ export default async function Products({ searchParams }: ProductsPageProps) {
         </p>
       </div>
       <ProductList
-        products={products}
+        products={serializedProducts}
         currentPage={currentPage}
         totalPages={totalPages}
+        searchQuery={searchQuery}
       />
     </div>
   );

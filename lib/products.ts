@@ -61,11 +61,36 @@ async function getAllProductIds(): Promise<string[]> {
  * Fetches a specific page of products with full details
  */
 export async function getProductsPage(
-  page: number = 1
+  page: number = 1,
+  searchQuery?: string
 ): Promise<ProductPaginationResult> {
   // Get all product IDs
   const allProductIds = await getAllProductIds();
-  const totalCount = allProductIds.length;
+
+  // Fetch full product details for all products if we need to search
+  let allProducts: Stripe.Product[] = [];
+  if (searchQuery) {
+    allProducts = await Promise.all(
+      allProductIds.map((id) =>
+        stripe.products.retrieve(id, {
+          expand: ["default_price"],
+        })
+      )
+    );
+
+    // Filter products by search query (search in name and description)
+    const query = searchQuery.toLowerCase().trim();
+    allProducts = allProducts.filter((product) => {
+      const nameMatch = product.name.toLowerCase().includes(query);
+      const descriptionMatch = product.description
+        ?.toLowerCase()
+        .includes(query);
+      return nameMatch || descriptionMatch;
+    });
+  }
+
+  // Calculate pagination based on filtered or all products
+  const totalCount = searchQuery ? allProducts.length : allProductIds.length;
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // Validate page number
@@ -74,16 +99,23 @@ export async function getProductsPage(
   // Calculate which products to fetch for this page
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalCount);
-  const pageProductIds = allProductIds.slice(startIndex, endIndex);
 
-  // Fetch full product details only for the current page
-  const products = await Promise.all(
-    pageProductIds.map((id) =>
-      stripe.products.retrieve(id, {
-        expand: ["default_price"],
-      })
-    )
-  );
+  let products: Stripe.Product[];
+
+  if (searchQuery) {
+    // Use already filtered products
+    products = allProducts.slice(startIndex, endIndex);
+  } else {
+    // Fetch full product details only for the current page
+    const pageProductIds = allProductIds.slice(startIndex, endIndex);
+    products = await Promise.all(
+      pageProductIds.map((id) =>
+        stripe.products.retrieve(id, {
+          expand: ["default_price"],
+        })
+      )
+    );
+  }
 
   return {
     products,
