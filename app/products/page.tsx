@@ -1,6 +1,5 @@
 import ProductList from "@/components/ProductList";
 import { getProductsPage } from "@/lib/products";
-import React from "react";
 
 interface ProductsPageProps {
   searchParams: Promise<{ page?: string }>;
