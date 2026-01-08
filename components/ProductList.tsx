@@ -4,7 +4,7 @@ import { Stripe } from "stripe";
 import ProductCard from "./ProductCard";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Search } from "lucide-react";
+import { Search, SearchX } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -24,7 +24,12 @@ interface ProductListProps {
   searchQuery: string;
 }
 
-function ProductList({ products, currentPage, totalPages, searchQuery }: ProductListProps) {
+function ProductList({
+  products,
+  currentPage,
+  totalPages,
+  searchQuery,
+}: ProductListProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
@@ -162,7 +167,10 @@ function ProductList({ products, currentPage, totalPages, searchQuery }: Product
   return (
     <div className="w-full space-y-6">
       <div className="w-full flex justify-center">
-        <form onSubmit={handleSearch} className="w-96 flex flex-nowrap items-center max-w-md">
+        <form
+          onSubmit={handleSearch}
+          className="w-96 flex flex-nowrap items-center max-w-md"
+        >
           <Input
             type="text"
             placeholder="Search products..."
@@ -184,13 +192,25 @@ function ProductList({ products, currentPage, totalPages, searchQuery }: Product
 
       <PaginationControls />
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {products.map((product) => (
-          <li key={product.id}>
-            <ProductCard product={product} />
-          </li>
-        ))}
-      </ul>
+      {products.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 space-y-4 text-muted-foreground text-center">
+          <SearchX className="size-16" />
+          <div className="space-y-1">
+            <p className="text-lg">
+              No results for &quot;{searchQuery}&quot;!
+            </p>
+            <p>Try searching for something else.</p>
+          </div>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {products.map((product) => (
+            <li key={product.id}>
+              <ProductCard product={product} />
+            </li>
+          ))}
+        </ul>
+      )}
 
       <PaginationControls />
     </div>
