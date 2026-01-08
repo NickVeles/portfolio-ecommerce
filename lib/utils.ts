@@ -1,6 +1,13 @@
 import { clsx, type ClassValue } from "clsx"
+import Stripe from "stripe";
 import { twMerge } from "tailwind-merge"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
+}
+
+export function slugifyProduct(product: Stripe.Product) {
+  const name = product.name.toLowerCase().replace(/\s+/g, "-");
+  const id = product.id.split("_")[1];
+  return `${name}-${id}`;
 }
