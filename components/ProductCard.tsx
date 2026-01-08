@@ -3,6 +3,7 @@ import Link from "next/link";
 import Stripe from "stripe";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import Image from "next/image";
+import { Slot } from "@radix-ui/react-slot";
 
 interface ProductCardProps {
   product: Stripe.Product;
@@ -13,8 +14,15 @@ function ProductCard({ product }: ProductCardProps) {
   const price = product.default_price as Stripe.Price | undefined;
 
   return (
-    <Link href={`/products/${slug}`} className="group h-full" title={product.name}>
-      <Card className="overflow-hidden transition-shadow hover:shadow-lg pt-0 h-full flex flex-col">
+    <Card
+      asChild
+      className="overflow-hidden transition-shadow hover:shadow-lg pt-0 h-full flex flex-col"
+    >
+      <Link
+        href={`/products/${slug}`}
+        className="group h-full"
+        title={product.name}
+      >
         {product.images && product.images[0] && (
           <div className="relative w-full h-64">
             <Image
@@ -39,8 +47,8 @@ function ProductCard({ product }: ProductCardProps) {
             <p className="text-muted-foreground">N/A</p>
           )}
         </CardContent>
-      </Card>
-    </Link>
+      </Link>
+    </Card>
   );
 }
 
