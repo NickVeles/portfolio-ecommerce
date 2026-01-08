@@ -13,26 +13,30 @@ function ProductCard({ product }: ProductCardProps) {
   const price = product.default_price as Stripe.Price | undefined;
 
   return (
-    <Link href={`/products/${slug}`}>
-      <Card>
+    <Link href={`/products/${slug}`} className="group">
+      <Card className="overflow-hidden transition-shadow hover:shadow-lg pt-0">
         {product.images && product.images[0] && (
-          <div className="relative w-full">
+          <div className="relative w-full h-64">
             <Image
               src={product.images[0]}
               alt={product.name}
               fill
-              className="object-cover transition-opacity duration-500 ease-in-out"
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           </div>
         )}
         <CardHeader>
-          <CardTitle>{product.name}</CardTitle>
+          <CardTitle className="text-lg group-hover:text-primary transition-colors">
+            {product.name}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           {price?.unit_amount ? (
-            <p>&euro;{`${(price.unit_amount / 100).toFixed(2)}`}</p>
+            <p className="text-xl font-semibold text-foreground">
+              &euro;{`${(price.unit_amount / 100).toFixed(2)}`}
+            </p>
           ) : (
-            <p>N/A</p>
+            <p className="text-muted-foreground">N/A</p>
           )}
         </CardContent>
       </Card>
