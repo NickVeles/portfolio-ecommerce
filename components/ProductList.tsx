@@ -201,6 +201,20 @@ function ProductList({
             </p>
             <p>Try searching for something else.</p>
           </div>
+          <Button
+            variant="link"
+            onClick={() => {
+              setSearchInput("");
+              const params = new URLSearchParams(searchParams.toString());
+              params.delete("search");
+              params.set("page", "1");
+              startTransition(() => {
+                router.push(`/products?${params.toString()}`);
+              });
+            }}
+          >
+            Clear search
+          </Button>
         </div>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
