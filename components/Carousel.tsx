@@ -46,7 +46,7 @@ function Carousel({ products }: CarouselProps) {
           />
         </div>
       )}
-      <CardContent className="absolute inset-0 flex flex-col items-center justify-center bg-foreground opacity-50">
+      <CardContent className="absolute inset-0 flex flex-col items-center text-center justify-center bg-foreground opacity-50">
         <CardTitle className="text-3xl font-bold text-background mb-2">
           {currentProduct.name}
         </CardTitle>
