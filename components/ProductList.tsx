@@ -1,6 +1,3 @@
-"use client";
-
-import { useState, useMemo } from "react";
 import { Stripe } from "stripe";
 import ProductCard from "./ProductCard";
 import {
@@ -15,24 +12,13 @@ import {
 
 interface ProductListProps {
   products: Stripe.Product[];
+  currentPage: number;
+  totalPages: number;
 }
 
-const ITEMS_PER_PAGE = 12;
-
-function ProductList({ products }: ProductListProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
-
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    return products.slice(startIndex, endIndex);
-  }, [products, currentPage]);
-
-  const goToPage = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+function ProductList({ products, currentPage, totalPages }: ProductListProps) {
+  const createPageUrl = (page: number) => {
+    return `/products?page=${page}`;
   };
 
   const renderPageNumbers = () => {
@@ -45,9 +31,8 @@ function ProductList({ products }: ProductListProps) {
         pages.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => goToPage(i)}
+              href={createPageUrl(i)}
               isActive={currentPage === i}
-              className="cursor-pointer"
             >
               {i}
             </PaginationLink>
@@ -58,11 +43,7 @@ function ProductList({ products }: ProductListProps) {
       // Always show first page
       pages.push(
         <PaginationItem key={1}>
-          <PaginationLink
-            onClick={() => goToPage(1)}
-            isActive={currentPage === 1}
-            className="cursor-pointer"
-          >
+          <PaginationLink href={createPageUrl(1)} isActive={currentPage === 1}>
             1
           </PaginationLink>
         </PaginationItem>
@@ -81,9 +62,8 @@ function ProductList({ products }: ProductListProps) {
         pages.push(
           <PaginationItem key={i}>
             <PaginationLink
-              onClick={() => goToPage(i)}
+              href={createPageUrl(i)}
               isActive={currentPage === i}
-              className="cursor-pointer"
             >
               {i}
             </PaginationLink>
@@ -100,9 +80,8 @@ function ProductList({ products }: ProductListProps) {
       pages.push(
         <PaginationItem key={totalPages}>
           <PaginationLink
-            onClick={() => goToPage(totalPages)}
+            href={createPageUrl(totalPages)}
             isActive={currentPage === totalPages}
-            className="cursor-pointer"
           >
             {totalPages}
           </PaginationLink>
@@ -118,11 +97,10 @@ function ProductList({ products }: ProductListProps) {
       <PaginationContent>
         <PaginationItem>
           <PaginationPrevious
-            onClick={() => goToPage(currentPage - 1)}
+            href={currentPage > 1 ? createPageUrl(currentPage - 1) : undefined}
+            aria-disabled={currentPage === 1}
             className={
-              currentPage === 1
-                ? "pointer-events-none opacity-50"
-                : "cursor-pointer"
+              currentPage === 1 ? "pointer-events-none opacity-50" : undefined
             }
           />
         </PaginationItem>
@@ -131,11 +109,16 @@ function ProductList({ products }: ProductListProps) {
 
         <PaginationItem>
           <PaginationNext
-            onClick={() => goToPage(currentPage + 1)}
+            href={
+              currentPage < totalPages
+                ? createPageUrl(currentPage + 1)
+                : undefined
+            }
+            aria-disabled={currentPage === totalPages}
             className={
               currentPage === totalPages
                 ? "pointer-events-none opacity-50"
-                : "cursor-pointer"
+                : undefined
             }
           />
         </PaginationItem>
@@ -156,7 +139,7 @@ function ProductList({ products }: ProductListProps) {
       <PaginationControls />
 
       <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {paginatedProducts.map((product) => (
+        {products.map((product) => (
           <li key={product.id}>
             <ProductCard product={product} />
           </li>
