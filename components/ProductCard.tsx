@@ -13,7 +13,7 @@ function ProductCard({ product }: ProductCardProps) {
   const price = product.default_price as Stripe.Price | undefined;
 
   return (
-    <Link href={`/products/${slug}`} className="group h-full">
+    <Link href={`/products/${slug}`} className="group h-full" title={product.name}>
       <Card className="overflow-hidden transition-shadow hover:shadow-lg pt-0 h-full flex flex-col">
         {product.images && product.images[0] && (
           <div className="relative w-full h-64">
