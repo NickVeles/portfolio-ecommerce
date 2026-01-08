@@ -5,7 +5,7 @@ import React from "react";
 export default async function Products() {
   const products = await stripe.products.list({
     expand: ["data.default_price"],
-    limit: 12,
+    limit: 100,
   });
   return (
     <div className="space-y-8">
