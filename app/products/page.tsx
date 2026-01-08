@@ -14,7 +14,7 @@ export default async function Products({ searchParams }: ProductsPageProps) {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
+      <div className="flex flex-col items-center justify-center gap-2">
         <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
           All Products
         </h1>
