@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Logo } from "./Icons";
-import { ShoppingCart } from "lucide-react";
+import { CartIcon } from "./CartIcon";
 
 function Navbar() {
   return (
-    <nav className="sticky top-0 z-50 bg-white shadow flex justify-center">
+    <nav className="sticky top-0 z-50 bg-card shadow flex justify-center">
       <div className="container flex items-center py-4 px-8">
         {/* For some reason, using flex-1 instead of mr-auto inherits child's cursor behavior
         - e.g. clicking outside the logo still triggers the Link */}
@@ -25,12 +25,7 @@ function Navbar() {
           </Link>
         </div>
         <div className="px-6">
-          <Link href="/cart">
-            <ShoppingCart
-              className="size-6 text-gray-700 hover:text-secondary"
-              aria-label="Cart"
-            />
-          </Link>
+          <CartIcon />
         </div>
       </div>
     </nav>
