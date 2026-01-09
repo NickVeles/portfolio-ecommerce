@@ -11,5 +11,10 @@ export default async function Product({
   const product = await stripe.products.retrieve(id, {
     expand: ["default_price"],
   });
-  return <ProductDetail product={product} />;
+
+  return (
+    <div className="max-w-7xl mx-auto">
+      <ProductDetail product={product} />
+    </div>
+  );
 }
