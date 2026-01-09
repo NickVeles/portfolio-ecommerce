@@ -1,8 +1,6 @@
 import Image from "next/image";
 import Stripe from "stripe";
-import { Button } from "./ui/button";
-import { Minus, Plus } from "lucide-react";
-import { Input } from "./ui/input";
+import QuantitySelector from "./QuantitySelector";
 
 interface ProductDetailProps {
   product: Stripe.Product;
@@ -49,42 +47,7 @@ function ProductDetail({ product }: ProductDetailProps) {
         </div>
 
         {/* Quantity Selector and Add to Cart */}
-        <div className="space-y-4 pt-4">
-          <div className="flex flex-col sm:flex-row items-center gap-3">
-            <div className="flex items-center  flex-nowrap w-2/3 sm:w-auto">
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-10 rounded-r-none"
-                aria-label="Decrease quantity"
-              >
-                <Minus className="size-4" />
-              </Button>
-              <Input
-                type="number"
-                value="1"
-                readOnly
-                className="text-center h-10 rounded-none border-x-0"
-                min={1}
-                max={99}
-              />
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-10 rounded-l-none"
-                aria-label="Increase quantity"
-              >
-                <Plus className="size-4" />
-              </Button>
-            </div>
-
-          <Button
-            className="h-10 text-base font-semibold px-10 w-2/3 sm:w-auto"
-          >
-            Add to Cart
-          </Button>
-          </div>
-        </div>
+        <QuantitySelector />
       </div>
     </div>
   );
