@@ -42,7 +42,7 @@ function QuantitySelector({
   return (
     <div className="space-y-4 pt-4">
       <div className="flex flex-col sm:flex-row items-center gap-3">
-        <div className="flex items-center flex-nowrap w-2/3 sm:w-auto">
+        <div className="flex items-center flex-nowrap w-2/3 sm:w-auto min-w-36">
           <Button
             variant="outline"
             size="icon"
@@ -53,7 +53,7 @@ function QuantitySelector({
           >
             <Minus className="size-4" />
           </Button>
-          <span className="flex items-center justify-center h-10 min-w-16 px-4 border border-input border-x-0 bg-background text-foreground text-sm font-medium">
+          <span className="flex flex-1 items-center justify-center h-10 min-w-16 px-4 border border-input border-x-0 bg-background text-foreground text-sm font-medium">
             {quantity}
           </span>
           <Button
@@ -69,7 +69,7 @@ function QuantitySelector({
         </div>
 
         <Button
-          className="h-10 text-base font-semibold px-10 w-2/3 sm:w-auto"
+          className="h-10 text-base font-semibold px-8 w-2/3 sm:w-auto min-w-36"
           onClick={handleAddToCart}
         >
           Add to Cart
