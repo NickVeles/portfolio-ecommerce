@@ -20,7 +20,7 @@ interface CartStore {
 
 export const createCartStore = create<CartStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       items: [],
       addItem: (item) =>
         set((state) => {
@@ -50,7 +50,8 @@ export const createCartStore = create<CartStore>()(
         })),
       clearCart: () => set({ items: [] }),
       getTotalPrice: () => {
-        return 0;
+        const state = get();
+        return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
       },
     }),
     {
