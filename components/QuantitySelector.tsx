@@ -37,6 +37,9 @@ function QuantitySelector({
       imageUrl: productImage,
       quantity,
     });
+
+    // Reset quantity to 1 after adding to cart
+    setQuantity(1);
   };
 
   return (
