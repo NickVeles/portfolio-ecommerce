@@ -39,7 +39,12 @@ function ProductDetail({ product }: ProductDetailProps) {
         </div>
 
         {/* Quantity Selector and Add to Cart */}
-        <QuantitySelector />
+        <QuantitySelector
+          productId={product.id}
+          productName={product.name}
+          productPrice={price?.unit_amount ? price.unit_amount / 100 : 0}
+          productImage={product.images?.[0] || null}
+        />
       </div>
     </div>
   );

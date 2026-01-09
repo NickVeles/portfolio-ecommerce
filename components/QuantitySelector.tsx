@@ -3,9 +3,23 @@
 import { Button } from "./ui/button";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
+import { createCartStore } from "@/store/cart-store";
 
-function QuantitySelector() {
+interface QuantitySelectorProps {
+  productId: string;
+  productName: string;
+  productPrice: number;
+  productImage: string | null;
+}
+
+function QuantitySelector({
+  productId,
+  productName,
+  productPrice,
+  productImage,
+}: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState(1);
+  const addItem = createCartStore((state) => state.addItem);
 
   const handleDecrement = () => {
     setQuantity((prev) => Math.max(1, prev - 1));
@@ -16,7 +30,13 @@ function QuantitySelector() {
   };
 
   const handleAddToCart = () => {
-    // Placeholder for future cart functionality
+    addItem({
+      id: productId,
+      name: productName,
+      price: productPrice,
+      imageUrl: productImage,
+      quantity,
+    });
   };
 
   return (
