@@ -25,7 +25,8 @@ export default async function Products({ searchParams }: ProductsPageProps) {
         <p className="text-muted-foreground">
           Browse our collection of
           {totalCount > 0 ? ` ${totalCount} ` : " our finest "}
-          products
+          product
+          {totalCount !== 1 && "s"}
         </p>
       </div>
       <ProductList
