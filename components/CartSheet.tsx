@@ -12,6 +12,7 @@ import {
 } from "./ui/sheet";
 import { createCartStore } from "@/store/cart-store";
 import { Minus, Plus, Trash2 } from "lucide-react";
+import { slugifyProduct } from "@/lib/utils";
 
 export function CartSheet() {
   const isOpen = createCartStore((state) => state.isSheetOpen);
@@ -79,9 +80,13 @@ export function CartSheet() {
                     )}
                     <div className="flex-1 flex flex-col gap-2">
                       <div className="flex justify-between items-start gap-2">
-                        <h4 className="font-medium line-clamp-2">
+                        <Link
+                          href={`/products/${slugifyProduct(item)}`}
+                          onClick={() => setIsOpen(false)}
+                          className="font-medium line-clamp-2 hover:text-secondary"
+                        >
                           {item.name}
-                        </h4>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="icon"
