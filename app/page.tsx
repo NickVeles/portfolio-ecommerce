@@ -25,7 +25,7 @@ export default async function Home() {
             <Button
               asChild
               variant="secondary"
-              className="inline-flex items-center justify-center rounded-full px-6 py-3"
+              className="inline-flex items-center justify-center rounded-lg px-6 py-3"
             >
               <Link
                 href="/products"
