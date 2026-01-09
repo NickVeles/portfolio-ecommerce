@@ -10,7 +10,7 @@ function Navbar() {
         - e.g. clicking outside the logo still triggers the Link */}
         <div className="mr-auto">
           <Link href="/" className="text-primary hover:text-secondary">
-            <Logo className="size-8" aria-label="VelBuy Logo" />
+            <Logo className="size-8" aria-label="Velbuy Logo" />
           </Link>
         </div>
         <div className="flex space-x-6">

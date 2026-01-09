@@ -16,7 +16,7 @@ export default async function Home() {
         <div className="flex items-center justify-around gap-8 px-8 sm:px-18 flex-wrap">
           <div className="max-w-md space-y-4">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-              Welcome to VelBuy
+              Welcome to Velbuy
             </h2>
             <p className="text-muted-foreground">
               Discover the best apparels and accessories at the best prices!
