@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function slugifyProduct(product: Stripe.Product) {
-  const name = product.name.toLowerCase().replace(/\s+/g, "-");
+  const name = product.name.toLowerCase().replace(/[^a-z0-9]+/g, "-");
   const id = product.id.split("_")[1];
   return `${name}-${id}`;
 }
