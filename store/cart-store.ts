@@ -1,5 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { toast } from "sonner";
+
+const MAX_CART_QUANTITY = 99;
 
 export interface CartItem {
   id: string;
@@ -24,6 +27,24 @@ export const createCartStore = create<CartStore>()(
       items: [],
       addItem: (item) =>
         set((state) => {
+          // Calculate current total quantity in cart
+          const currentTotal = state.items.reduce((sum, i) => sum + i.quantity, 0);
+          const availableSpace = MAX_CART_QUANTITY - currentTotal;
+
+          // If cart is full, show warning and don't add
+          if (availableSpace <= 0) {
+            toast.warning(`You can't have more than ${MAX_CART_QUANTITY} items in the cart.`);
+            return state;
+          }
+
+          // Calculate how many items we can actually add
+          const quantityToAdd = Math.min(item.quantity, availableSpace);
+
+          // If we can't add all requested items, show warning
+          if (quantityToAdd < item.quantity) {
+            toast.warning(`You can't have more than ${MAX_CART_QUANTITY} items in your cart.`);
+          }
+
           const existingItem = state.items.find((i) => i.id === item.id);
           // If item exists, update the quantity
           // Otherwise, add the new item
@@ -31,12 +52,12 @@ export const createCartStore = create<CartStore>()(
             return {
               items: state.items.map((i) =>
                 i.id === item.id
-                  ? { ...i, quantity: i.quantity + item.quantity }
+                  ? { ...i, quantity: i.quantity + quantityToAdd }
                   : i
               ),
             };
           }
-          return { items: [...state.items, item] };
+          return { items: [...state.items, { ...item, quantity: quantityToAdd }] };
         }),
       removeItem: (itemId) =>
         set((state) => ({
