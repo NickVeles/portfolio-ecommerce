@@ -20,6 +20,7 @@ function QuantitySelector({
 }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState(1);
   const addItem = createCartStore((state) => state.addItem);
+  const setSheetOpen = createCartStore((state) => state.setSheetOpen);
 
   const handleDecrement = () => {
     setQuantity((prev) => Math.max(1, prev - 1));
@@ -40,6 +41,9 @@ function QuantitySelector({
 
     // Reset quantity to 1 after adding to cart
     setQuantity(1);
+
+    // Open the cart sheet
+    setSheetOpen(true);
   };
 
   return (

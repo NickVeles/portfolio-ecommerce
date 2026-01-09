@@ -14,6 +14,8 @@ export interface CartItem {
 
 interface CartStore {
   items: CartItem[];
+  isSheetOpen: boolean;
+  setSheetOpen: (isOpen: boolean) => void;
   addItem: (item: CartItem) => void;
   removeItem: (itemId: string) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
@@ -26,6 +28,8 @@ export const createCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
+      isSheetOpen: false,
+      setSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
       addItem: (item) =>
         set((state) => {
           // Calculate current total quantity in cart
