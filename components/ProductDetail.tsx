@@ -15,12 +15,12 @@ function ProductDetail({ product }: ProductDetailProps) {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
       {/* Product Image */}
       {product.images && product.images[0] && (
-        <div className="relative h-64 sm:h-96 lg:h-[500px] w-full rounded-lg overflow-hidden bg-muted">
+        <div className="relative h-64 sm:h-96 lg:h-[500px] w-full rounded-lg overflow-hidden bg-card">
           <Image
             src={product.images[0]}
             alt={product.name}
             fill
-            className="object-cover"
+            className="hover:object-cover object-contain"
             priority
           />
         </div>
