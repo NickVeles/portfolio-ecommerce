@@ -16,11 +16,26 @@ export default async function useCheckout(formData: FormData): Promise<void> {
     quantity: item.quantity,
   }));
 
+  // Extract user info from form
+  const firstName = formData.get("firstName") as string;
+  const address = formData.get("address") as string;
+  const city = formData.get("city") as string;
+
+  // Merge location data
+  const location = `${address}, ${city}`;
+
+  // Encode params for URL
+  const params = new URLSearchParams({
+    firstName,
+    location,
+    bought: "true",
+  });
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items,
     mode: "payment",
-    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/thank-you`,
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/thank-you?${params.toString()}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout`,
   });
 
