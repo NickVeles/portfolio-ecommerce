@@ -15,8 +15,9 @@ function Navbar() {
           {/* For some reason, using flex-1 instead of mr-auto inherits child's cursor behavior
         - e.g. clicking outside the logo still triggers the Link */}
           <div className="mr-auto">
-            <Link href="/" className="text-primary hover:text-secondary">
-              <Logo className="size-8" aria-label="Velbuy Logo" />
+            <Link href="/" className="flex items-center gap-2 group">
+              <Logo className="size-8 text-primary group-hover:text-secondary" aria-label="Velbuy Logo" />
+              <span className="hidden sm:inline text-xl font-bold text-primary-foreground group-hover:text-secondary">Velbuy</span>
             </Link>
           </div>
           <div className="flex space-x-6">
