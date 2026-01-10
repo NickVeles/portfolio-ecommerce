@@ -16,15 +16,16 @@ import { CartSummary } from "./CartSummary";
 
 export function CartSheet() {
   const [mounted, setMounted] = useState(false);
-  const isOpen = createCartStore((state) => state.isSheetOpen);
-  const setIsOpen = createCartStore((state) => state.setSheetOpen);
-  const items = createCartStore((state) => state.items);
-  const updateItemQuantity = createCartStore(
-    (state) => state.updateItemQuantity
-  );
-  const removeItem = createCartStore((state) => state.removeItem);
-  const getTotalPrice = createCartStore((state) => state.getTotalPrice);
-  const getTotalQuantity = createCartStore((state) => state.getTotalQuantity);
+
+  const {
+    isSheetOpen,
+    setSheetOpen,
+    items,
+    updateItemQuantity,
+    removeItem,
+    getTotalPrice,
+    getTotalQuantity,
+  } = createCartStore();
 
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();
@@ -46,7 +47,7 @@ export function CartSheet() {
   }
 
   return (
-    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+    <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
       <SheetContent className="flex flex-col w-full sm:max-w-lg gap-0">
         <SheetHeader>
           <SheetTitle>Your Cart</SheetTitle>
@@ -63,7 +64,7 @@ export function CartSheet() {
           <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
             <p>Add items to your cart to get started!</p>
             <Button variant="link" className="mt-4" asChild>
-              <Link href="/products" onClick={() => setIsOpen(false)}>
+              <Link href="/products" onClick={() => setSheetOpen(false)}>
                 Shop Now
               </Link>
             </Button>
@@ -79,7 +80,7 @@ export function CartSheet() {
                     totalQuantity={totalQuantity}
                     onQuantityChange={handleQuantityChange}
                     onRemove={removeItem}
-                    onLinkClick={() => setIsOpen(false)}
+                    onLinkClick={() => setSheetOpen(false)}
                   />
                 ))}
               </div>
@@ -88,7 +89,7 @@ export function CartSheet() {
             <div className="border-t">
               <CartSummary
                 totalPrice={totalPrice}
-                onLinkClick={() => setIsOpen(false)}
+                onLinkClick={() => setSheetOpen(false)}
                 showViewCart={true}
               />
             </div>

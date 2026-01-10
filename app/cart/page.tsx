@@ -10,13 +10,14 @@ import { ArrowLeft } from "lucide-react";
 
 export default function CartPage() {
   const [mounted, setMounted] = useState(false);
-  const items = createCartStore((state) => state.items);
-  const updateItemQuantity = createCartStore(
-    (state) => state.updateItemQuantity
-  );
-  const removeItem = createCartStore((state) => state.removeItem);
-  const getTotalPrice = createCartStore((state) => state.getTotalPrice);
-  const getTotalQuantity = createCartStore((state) => state.getTotalQuantity);
+
+  const {
+    items,
+    updateItemQuantity,
+    removeItem,
+    getTotalPrice,
+    getTotalQuantity,
+  } = createCartStore();
 
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();
