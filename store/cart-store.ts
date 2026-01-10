@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import { toast } from "sonner";
 
 const MAX_CART_QUANTITY = 99;
+const MAX_CART_QUANTITY_WARNING = `You can't have more than ${MAX_CART_QUANTITY} items in your cart.`;
 
 export interface CartItem {
   id: string;
@@ -33,12 +34,17 @@ export const createCartStore = create<CartStore>()(
       addItem: (item) =>
         set((state) => {
           // Calculate current total quantity in cart
-          const currentTotal = state.items.reduce((sum, i) => sum + i.quantity, 0);
+          const currentTotal = state.items.reduce(
+            (sum, i) => sum + i.quantity,
+            0
+          );
           const availableSpace = MAX_CART_QUANTITY - currentTotal;
 
           // If cart is full, show warning and don't add
           if (availableSpace <= 0) {
-            toast.warning(`You can't have more than ${MAX_CART_QUANTITY} items in the cart.`);
+            toast.warning(
+              `You can't have more than ${MAX_CART_QUANTITY} items in the cart.`
+            );
             return state;
           }
 
@@ -47,7 +53,7 @@ export const createCartStore = create<CartStore>()(
 
           // If we can't add all requested items, show warning
           if (quantityToAdd < item.quantity) {
-            toast.warning(`You can't have more than ${MAX_CART_QUANTITY} items in your cart.`);
+            toast.warning(MAX_CART_QUANTITY_WARNING);
           }
 
           const existingItem = state.items.find((i) => i.id === item.id);
@@ -62,22 +68,47 @@ export const createCartStore = create<CartStore>()(
               ),
             };
           }
-          return { items: [...state.items, { ...item, quantity: quantityToAdd }] };
+          return {
+            items: [...state.items, { ...item, quantity: quantityToAdd }],
+          };
         }),
       removeItem: (itemId) =>
         set((state) => ({
           items: state.items.filter((i) => i.id !== itemId),
         })),
       updateItemQuantity: (itemId, quantity) =>
-        set((state) => ({
-          items: state.items.map((i) =>
-            i.id === itemId ? { ...i, quantity } : i
-          ),
-        })),
+        set((state) => {
+          // Calculate current total quantity excluding the item being updated
+          const currentItem = state.items.find((i) => i.id === itemId);
+          if (!currentItem) return state;
+
+          const otherItemsTotal = state.items
+            .filter((i) => i.id !== itemId)
+            .reduce((sum, i) => sum + i.quantity, 0);
+
+          const availableSpace = MAX_CART_QUANTITY - otherItemsTotal;
+
+          // Cap the quantity to available space
+          const newQuantity = Math.min(quantity, availableSpace);
+
+          // Show warning if we can't set the full requested quantity
+          if (newQuantity < quantity) {
+            toast.warning(MAX_CART_QUANTITY_WARNING);
+          }
+
+          return {
+            items: state.items.map((i) =>
+              i.id === itemId ? { ...i, quantity: newQuantity } : i
+            ),
+          };
+        }),
       clearCart: () => set({ items: [] }),
       getTotalPrice: () => {
         const state = get();
-        return state.items.reduce((total, item) => total + item.price * item.quantity, 0);
+        return state.items.reduce(
+          (total, item) => total + item.price * item.quantity,
+          0
+        );
       },
       getTotalQuantity: () => {
         const state = get();
