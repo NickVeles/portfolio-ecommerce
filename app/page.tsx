@@ -1,4 +1,4 @@
-import Carousel from "@/components/Carousel";
+import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
 import { stripe } from "@/lib/stripe";
 import Link from "next/link";
@@ -6,7 +6,7 @@ import Link from "next/link";
 export default async function Home() {
   const products = await stripe.products.list({
     expand: ["data.default_price"],
-    limit: 5,
+    limit: 4,
   });
 
   return (
@@ -41,7 +41,17 @@ export default async function Home() {
         </div>
       </section>
       <section className="py-8">
-        <Carousel products={products.data} />
+        <h2 className="text-2xl font-bold mb-6 text-center">Recent Additions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {products.data.map((product) => (
+            <ProductCard key={product.id} product={product} />
+          ))}
+        </div>
+        <div className="flex justify-center">
+          <Button asChild>
+            <Link href="/products">Browse All</Link>
+          </Button>
+        </div>
       </section>
     </div>
   );
