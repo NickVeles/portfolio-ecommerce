@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createCartStore } from "@/store/cart-store";
@@ -8,6 +9,7 @@ import { CartSummary } from "@/components/CartSummary";
 import { ArrowLeft } from "lucide-react";
 
 export default function CartPage() {
+  const [mounted, setMounted] = useState(false);
   const items = createCartStore((state) => state.items);
   const updateItemQuantity = createCartStore(
     (state) => state.updateItemQuantity
@@ -19,6 +21,10 @@ export default function CartPage() {
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(itemId);
@@ -26,6 +32,23 @@ export default function CartPage() {
       updateItemQuantity(itemId, newQuantity);
     }
   };
+
+  if (!mounted) {
+    return (
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-6">
+          <Button variant="ghost" size="sm" asChild className="mb-4">
+            <Link href="/products">
+              <ArrowLeft className="size-4 mr-2" />
+              Continue Shopping
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold">Shopping Cart</h1>
+          <p className="text-muted-foreground mt-2">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto">

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "./ui/button";
 import {
@@ -14,6 +15,7 @@ import { CartItem } from "./CartItem";
 import { CartSummary } from "./CartSummary";
 
 export function CartSheet() {
+  const [mounted, setMounted] = useState(false);
   const isOpen = createCartStore((state) => state.isSheetOpen);
   const setIsOpen = createCartStore((state) => state.setSheetOpen);
   const items = createCartStore((state) => state.items);
@@ -27,6 +29,10 @@ export function CartSheet() {
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleQuantityChange = (itemId: string, newQuantity: number) => {
     if (newQuantity <= 0) {
       removeItem(itemId);
@@ -34,6 +40,10 @@ export function CartSheet() {
       updateItemQuantity(itemId, newQuantity);
     }
   };
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Sheet open={isOpen} onOpenChange={setIsOpen}>
