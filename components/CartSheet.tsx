@@ -50,7 +50,7 @@ export function CartSheet() {
     <Sheet open={isSheetOpen} onOpenChange={setSheetOpen}>
       <SheetContent className="flex flex-col w-full sm:max-w-lg gap-0">
         <SheetHeader>
-          <SheetTitle>Your Cart</SheetTitle>
+          <SheetTitle>Shopping Cart</SheetTitle>
           <SheetDescription>
             {totalQuantity === 0
               ? "Your cart is empty"

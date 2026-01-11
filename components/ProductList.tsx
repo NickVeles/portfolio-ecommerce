@@ -183,7 +183,7 @@ function ProductList({
       <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4">
         <form
           onSubmit={handleSearch}
-          className="w-96 flex flex-nowrap items-center max-w-md"
+          className="w-full flex flex-nowrap items-center max-w-md"
         >
           <Input
             type="text"
