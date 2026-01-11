@@ -28,7 +28,7 @@ export function ClerkSignInButton() {
   };
 
   if (!isLoaded) {
-    return <Spinner className="size-7" />;
+    return <Spinner className="size-6" />;
   }
 
   return (
@@ -69,10 +69,10 @@ export function ClerkSignInButton() {
 
       <SignedIn>
         <UserButton
-          fallback={<Spinner className="size-7" />}
+          fallback={<Spinner className="size-6" />}
           appearance={{
             elements: {
-              avatarBox: "size-7",
+              avatarBox: { height: 24, width: 24 },
             },
           }}
         />
