@@ -7,8 +7,7 @@ function Navbar() {
   return (
     <div className="sticky top-0 z-50 w-full">
       <div className="bg-destructive text-destructive-foreground text-center py-2 px-4 text-sm font-semibold flex items-center justify-center gap-2">
-        <TriangleAlert className="size-5" /> Portfolio Project Only - Do Not Use Real Payment Information or
-        Personal Credentials
+        <TriangleAlert className="min-w-5 min-h-5" /> <span className="inline"><span className="underline">Portfolio Project Only</span> - Do Not Use Real Payment Information or Personal Credentials</span>
       </div>
       <nav className="bg-card shadow flex justify-center">
         <div className="container flex items-center py-4 px-6 sm:px-8">
