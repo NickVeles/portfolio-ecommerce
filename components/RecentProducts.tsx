@@ -8,15 +8,13 @@ import { Skeleton } from "./ui/skeleton";
 import { Spinner } from "./ui/spinner";
 
 export default function RecentProducts() {
-  const { isLoaded } = useAuth();
 
   const { data, isPending } = useQuery({
     queryKey: productKeys.recent(),
     queryFn: fetchRecentProducts,
-    enabled: isLoaded,
   });
 
-  if (!isLoaded || isPending) {
+  if (isPending) {
     return (
       <>
         {Array.from({ length: 4 }).map((_, index) => (

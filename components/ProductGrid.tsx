@@ -7,7 +7,6 @@ import { SearchX } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { Spinner } from "./ui/spinner";
 import { Skeleton } from "./ui/skeleton";
 
@@ -22,12 +21,10 @@ export default function ProductGrid({
   searchQuery,
   sortBy,
 }: ProductGridProps) {
-  const { isLoaded } = useAuth();
 
   const { data, isPending } = useQuery({
     queryKey: productKeys.list(page, searchQuery, sortBy),
     queryFn: () => fetchProductsPage(page, searchQuery, sortBy),
-    enabled: isLoaded,
   });
 
   const router = useRouter();
@@ -35,7 +32,7 @@ export default function ProductGrid({
   const [_1, setSearchInput] = useState(searchQuery);
   const [_2, startTransition] = useTransition();
 
-  if (!isLoaded || isPending) {
+  if (isPending) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {Array.from({ length: 12 }).map((_, index) => (
