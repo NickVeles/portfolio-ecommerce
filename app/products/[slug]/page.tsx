@@ -15,11 +15,6 @@ export async function generateMetadata({
       expand: ["default_price"],
     });
 
-    const price =
-      product.default_price && typeof product.default_price !== "string"
-        ? (product.default_price.unit_amount || 0) / 100
-        : 0;
-
     return {
       title: product.name,
       description:
