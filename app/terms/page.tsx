@@ -1,5 +1,21 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms and Precautions",
+  description:
+    "Important information about Velbuy. This is a portfolio demonstration website with test payment mode. No actual products are sold or shipped. All transactions are for demonstration purposes only.",
+  openGraph: {
+    title: "Terms and Precautions - Velbuy",
+    description:
+      "Portfolio demonstration website with test payment mode. No actual transactions or product shipments.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
 
 export default function Terms() {
   return (

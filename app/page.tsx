@@ -4,6 +4,19 @@ import { Suspense } from "react";
 import RecentProducts from "@/components/RecentProducts";
 import { Spinner } from "@/components/ui/spinner";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Home",
+  description:
+    "Welcome to Velbuy - Your premier online shopping destination for the best apparels and accessories. Browse our latest collection and discover amazing deals.",
+  openGraph: {
+    title: "Velbuy - Welcome to Your Premier Shopping Destination",
+    description:
+      "Discover the best apparels and accessories at unbeatable prices. Shop the latest fashion trends.",
+    images: ["/banner.jpg"],
+  },
+};
 
 export default function Home() {
   return (

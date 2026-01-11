@@ -2,6 +2,17 @@ import Link from "next/link";
 import { ServerOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Server Error",
+  description:
+    "500 - Internal Server Error. Something went wrong on our end. Please try again later or contact support if the problem persists.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function ServerError() {
   return (

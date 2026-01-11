@@ -3,6 +3,18 @@ import { Link as LinkIcon } from "lucide-react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGithub, faLinkedin } from "@fortawesome/free-brands-svg-icons";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "About",
+  description:
+    "Learn about Velbuy - a portfolio e-commerce project built with modern web technologies including Next.js, Stripe, and TypeScript. Created by Nick Veles.",
+  openGraph: {
+    title: "About Velbuy - Portfolio E-commerce Project",
+    description:
+      "A portfolio e-commerce website showcasing modern web development with Next.js and Stripe integration.",
+  },
+};
 
 export default function About() {
   return (
