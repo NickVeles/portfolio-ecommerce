@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { CartItem } from "@/components/CartItem";
 import { CartSummary } from "@/components/CartSummary";
 import { ArrowLeft } from "lucide-react";
@@ -17,7 +17,7 @@ export default function CartPage() {
     removeItem,
     getTotalPrice,
     getTotalQuantity,
-  } = createCartStore();
+  } = useCartStore();
 
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();

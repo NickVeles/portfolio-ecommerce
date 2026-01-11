@@ -10,7 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "./ui/sheet";
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { CartItem } from "./CartItem";
 import { CartSummary } from "./CartSummary";
 
@@ -25,7 +25,7 @@ export function CartSheet() {
     removeItem,
     getTotalPrice,
     getTotalQuantity,
-  } = createCartStore();
+  } = useCartStore();
 
   const totalPrice = getTotalPrice();
   const totalQuantity = getTotalQuantity();

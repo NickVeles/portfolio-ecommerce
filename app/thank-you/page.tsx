@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
@@ -10,7 +10,7 @@ import { CheckCircle2 } from "lucide-react";
 export default function ThankYou() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { clearCart } = createCartStore();
+  const { clearCart } = useCartStore();
 
   const bought = searchParams.get("bought");
   const firstName = searchParams.get("firstName");

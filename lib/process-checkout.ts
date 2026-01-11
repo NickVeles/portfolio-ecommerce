@@ -4,7 +4,7 @@ import { CartItem } from "@/store/cart-store";
 import { stripe } from "./stripe";
 import { redirect } from "next/navigation";
 
-export default async function useCheckout(formData: FormData): Promise<void> {
+export default async function processCheckout(formData: FormData): Promise<void> {
   const itemsJson = formData.get("items") as string;
   const items = JSON.parse(itemsJson);
   const line_items = items.map((item: CartItem) => ({

@@ -3,7 +3,7 @@
 import { Button } from "./ui/button";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 
 interface QuantitySelectorProps {
   productId: string;
@@ -19,8 +19,8 @@ function QuantitySelector({
   productImage,
 }: QuantitySelectorProps) {
   const [quantity, setQuantity] = useState(1);
-  const addItem = createCartStore((state) => state.addItem);
-  const setSheetOpen = createCartStore((state) => state.setSheetOpen);
+  const addItem = useCartStore((state) => state.addItem);
+  const setSheetOpen = useCartStore((state) => state.setSheetOpen);
 
   const handleDecrement = () => {
     setQuantity((prev) => Math.max(1, prev - 1));

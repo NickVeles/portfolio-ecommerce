@@ -1,18 +1,18 @@
 "use client";
 
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import Link from "next/link";
 import { slugifyProduct } from "@/lib/utils";
-import useCheckout from "@/lib/use-checkout";
+import processCheckout from "@/lib/process-checkout";
 import { useEffect, useState } from "react";
 
 export default function Checkout() {
   const [mounted, setMounted] = useState(false);
-  const { items, getTotalPrice } = createCartStore();
+  const { items, getTotalPrice } = useCartStore();
   const totalPrice = getTotalPrice();
 
   useEffect(() => {
@@ -43,7 +43,7 @@ export default function Checkout() {
         {/* User Info Form */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-          <form action={useCheckout} className="space-y-4">
+          <form action={processCheckout} className="space-y-4">
             <input type="hidden" name="items" value={JSON.stringify(items)} />
 
             <div className="grid grid-cols-2 gap-4">

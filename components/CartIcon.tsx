@@ -1,12 +1,12 @@
 "use client";
 
 import { ShoppingCart } from "lucide-react";
-import { createCartStore } from "@/store/cart-store";
+import { useCartStore } from "@/store/cart-store";
 import { useEffect, useState } from "react";
 
 export function CartIcon() {
-  const totalQuantity = createCartStore((state) => state.getTotalQuantity());
-  const setSheetOpen = createCartStore((state) => state.setSheetOpen);
+  const totalQuantity = useCartStore((state) => state.getTotalQuantity());
+  const setSheetOpen = useCartStore((state) => state.setSheetOpen);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {

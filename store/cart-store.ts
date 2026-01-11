@@ -25,7 +25,7 @@ interface CartStore {
   getTotalQuantity: () => number;
 }
 
-export const createCartStore = create<CartStore>()(
+export const useCartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
