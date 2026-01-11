@@ -19,6 +19,12 @@ interface ProductPaginationResult {
   currentPage: number;
 }
 
+export interface ProductMetadata {
+  totalCount: number;
+  totalPages: number;
+  itemsPerPage: number;
+}
+
 function getBaseUrl() {
   // Browser should use relative path
   if (typeof window !== "undefined") return "";
@@ -27,6 +33,27 @@ function getBaseUrl() {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
   return `http://localhost:${process.env.PORT ?? 3000}`;
+}
+
+export async function fetchProductMetadata(
+  searchQuery?: string
+): Promise<ProductMetadata> {
+  const params = new URLSearchParams({
+    ...(searchQuery && { search: searchQuery }),
+  });
+
+  const response = await fetch(
+    `${getBaseUrl()}/api/products/metadata?${params}`,
+    {
+      cache: "no-store",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch product metadata");
+  }
+
+  return response.json();
 }
 
 export async function fetchRecentProducts(): Promise<RecentProductsResult> {

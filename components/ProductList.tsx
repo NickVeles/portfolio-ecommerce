@@ -1,9 +1,8 @@
 "use client";
 
-import ProductCard from "./ProductCard";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { Search, SearchX } from "lucide-react";
+import { Search } from "lucide-react";
 import {
   Pagination,
   PaginationContent,
@@ -14,22 +13,24 @@ import {
   PaginationEllipsis,
 } from "./ui/pagination";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useTransition } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { productKeys, fetchProductsPage } from "@/lib/queries/products";
+import { useState, useTransition, Suspense } from "react";
+import ProductGrid from "./ProductGrid";
+import { Spinner } from "./ui/spinner";
 
 interface ProductListProps {
   page: number;
   searchQuery: string;
+  totalPages: number;
+  totalCount: number;
 }
 
-function ProductList({ page, searchQuery }: ProductListProps) {
-  const { data } = useSuspenseQuery({
-    queryKey: productKeys.list(page, searchQuery),
-    queryFn: () => fetchProductsPage(page, searchQuery),
-  });
-
-  const { products, currentPage, totalPages, totalCount } = data;
+function ProductList({
+  page,
+  searchQuery,
+  totalPages,
+  totalCount,
+}: ProductListProps) {
+  const currentPage = page;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
@@ -192,39 +193,15 @@ function ProductList({ page, searchQuery }: ProductListProps) {
 
       <PaginationControls />
 
-      {products.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 space-y-4 text-muted-foreground text-center">
-          <SearchX className="size-16" />
-          <div className="space-y-1">
-            <p className="text-lg">
-              No results for &quot;{searchQuery}&quot;!
-            </p>
-            <p>Try searching for something else.</p>
+      <Suspense
+        fallback={
+          <div className="flex justify-center items-center py-16">
+            <Spinner className="size-8" />
           </div>
-          <Button
-            variant="link"
-            onClick={() => {
-              setSearchInput("");
-              const params = new URLSearchParams(searchParams.toString());
-              params.delete("search");
-              params.set("page", "1");
-              startTransition(() => {
-                router.push(`/products?${params.toString()}`);
-              });
-            }}
-          >
-            Clear search
-          </Button>
-        </div>
-      ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {products.map((product) => (
-            <li key={product.id}>
-              <ProductCard product={product} />
-            </li>
-          ))}
-        </ul>
-      )}
+        }
+      >
+        <ProductGrid page={currentPage} searchQuery={searchQuery} />
+      </Suspense>
 
       <PaginationControls />
     </div>

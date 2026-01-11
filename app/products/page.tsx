@@ -1,6 +1,5 @@
 import ProductList from "@/components/ProductList";
-import { Suspense } from "react";
-import { Spinner } from "@/components/ui/spinner";
+import { fetchProductMetadata } from "@/lib/queries/products";
 
 interface ProductsPageProps {
   searchParams: Promise<{ page?: string; search?: string }>;
@@ -11,6 +10,8 @@ export default async function Products({ searchParams }: ProductsPageProps) {
   const page = parseInt(params.page || "1", 10);
   const searchQuery = params.search || "";
 
+  const { totalCount, totalPages } = await fetchProductMetadata(searchQuery);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col items-center justify-center gap-2">
@@ -18,18 +19,18 @@ export default async function Products({ searchParams }: ProductsPageProps) {
           All Products
         </h1>
         <p className="text-muted-foreground">
-          Browse our collection of products
+          Browse our collection of
+          {totalCount > 0 ? ` ${totalCount} ` : " our finest "}
+          product
+          {totalCount !== 1 && "s"}
         </p>
       </div>
-      <Suspense
-        fallback={
-          <div className="flex justify-center items-center py-16">
-            <Spinner className="size-8" />
-          </div>
-        }
-      >
-        <ProductList page={page} searchQuery={searchQuery} />
-      </Suspense>
+      <ProductList
+        page={page}
+        searchQuery={searchQuery}
+        totalPages={totalPages}
+        totalCount={totalCount}
+      />
     </div>
   );
 }
