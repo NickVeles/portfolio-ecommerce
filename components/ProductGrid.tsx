@@ -1,12 +1,15 @@
 "use client";
 
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { productKeys, fetchProductsPage } from "@/lib/queries/products";
 import ProductCard from "./ProductCard";
 import { SearchX } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { Spinner } from "./ui/spinner";
+import { Skeleton } from "./ui/skeleton";
 
 interface ProductGridProps {
   page: number;
@@ -19,20 +22,35 @@ export default function ProductGrid({
   searchQuery,
   sortBy,
 }: ProductGridProps) {
-  const { data } = useSuspenseQuery({
+  const { isLoaded } = useAuth();
+
+  const { data, isPending } = useQuery({
     queryKey: productKeys.list(page, searchQuery, sortBy),
     queryFn: () => fetchProductsPage(page, searchQuery, sortBy),
-    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
+    enabled: isLoaded,
   });
 
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [searchInput, setSearchInput] = useState(searchQuery);
-  const [isPending, startTransition] = useTransition();
+  const [_1, setSearchInput] = useState(searchQuery);
+  const [_2, startTransition] = useTransition();
 
-  const { products } = data;
+  if (!isLoaded || isPending) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {Array.from({ length: 12 }).map((_, index) => (
+          <Skeleton
+            key={index}
+            className="min-w-full min-h-105.5 rounded-xl opacity-50 flex justify-center items-center"
+          >
+            <Spinner className="size-8" />
+          </Skeleton>
+        ))}
+      </div>
+    );
+  }
 
-  if (products.length === 0) {
+  if (!data || data.products.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-16 space-y-4 text-muted-foreground text-center">
         <SearchX className="size-16" />
@@ -60,7 +78,7 @@ export default function ProductGrid({
 
   return (
     <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-      {products.map((product) => (
+      {data.products.map((product) => (
         <li key={product.id}>
           <ProductCard product={product} />
         </li>

@@ -1,9 +1,6 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Suspense } from "react";
 import RecentProducts from "@/components/RecentProducts";
-import { Spinner } from "@/components/ui/spinner";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -55,22 +52,7 @@ export default function Home() {
           Recent Additions
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <Suspense
-            fallback={
-              <>
-                {Array.from({ length: 4 }).map((_, index) => (
-                  <Skeleton
-                    key={index}
-                    className="min-w-full min-h-105.5 rounded-xl opacity-50 flex justify-center items-center"
-                  >
-                    <Spinner className="size-8" />
-                  </Skeleton>
-                ))}
-              </>
-            }
-          >
-            <RecentProducts />
-          </Suspense>
+          <RecentProducts />
         </div>
         <div className="flex justify-center">
           <Button asChild>
