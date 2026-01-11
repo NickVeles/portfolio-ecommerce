@@ -7,7 +7,6 @@ import { Toaster } from "sonner";
 import { CartSheet } from "@/components/CartSheet";
 import { QueryProvider } from "@/components/providers/QueryProvider";
 import { ClerkProvider } from "@clerk/nextjs";
-import { ClerkLoadedWrapper } from "@/components/providers/ClerkLoadedWrapper";
 
 const poppinsSans = Poppins({
   variable: "--font-sans",
@@ -87,13 +86,11 @@ export default function RootLayout({
           className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-screen flex-col bg-background`}
         >
           <QueryProvider>
-            <ClerkLoadedWrapper>
-              <Toaster position="bottom-right" />
-              <CartSheet />
-              <Navbar />
-              <main className="grow container mx-auto px-4 py-8">{children}</main>
-              <Footer />
-            </ClerkLoadedWrapper>
+            <Toaster position="bottom-right" />
+            <CartSheet />
+            <Navbar />
+            <main className="grow container mx-auto px-4 py-8">{children}</main>
+            <Footer />
           </QueryProvider>
         </body>
       </html>

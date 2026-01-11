@@ -7,9 +7,6 @@ import { SearchX } from "lucide-react";
 import { Button } from "./ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition, useState } from "react";
-import { useClerkLoaded } from "@/components/providers/ClerkLoadedWrapper";
-import { Spinner } from "./ui/spinner";
-import { Skeleton } from "./ui/skeleton";
 
 interface ProductGridProps {
   page: number;
@@ -22,32 +19,16 @@ export default function ProductGrid({
   searchQuery,
   sortBy,
 }: ProductGridProps) {
-  const isClerkLoaded = useClerkLoaded();
-
   const { data } = useSuspenseQuery({
-    queryKey: [...productKeys.list(page, searchQuery, sortBy), isClerkLoaded],
+    queryKey: productKeys.list(page, searchQuery, sortBy),
     queryFn: () => fetchProductsPage(page, searchQuery, sortBy),
+    staleTime: 5 * 60 * 1000, // Data stays fresh for 5 minutes
   });
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [isPending, startTransition] = useTransition();
-
-  if (!isClerkLoaded) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {Array.from({ length: 12 }).map((_, index) => (
-          <Skeleton
-            key={index}
-            className="min-w-full min-h-105.5 rounded-xl opacity-50 flex justify-center items-center"
-          >
-            <Spinner className="size-8" />
-          </Skeleton>
-        ))}
-      </div>
-    );
-  }
 
   const { products } = data;
 
