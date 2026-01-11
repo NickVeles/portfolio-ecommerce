@@ -9,7 +9,7 @@ export default function NotFound() {
       <Card className="max-w-2xl mx-auto">
         <CardContent className="text-center space-y-6 pt-6">
           <div className="flex justify-center">
-            <FileQuestion className="size-12 text-muted-foreground" />
+            <FileQuestion className="size-18 text-muted-foreground" />
           </div>
 
           <h1 className="text-3xl font-bold">Page Not Found (404)</h1>

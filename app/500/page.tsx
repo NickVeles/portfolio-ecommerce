@@ -9,7 +9,7 @@ export default function ServerError() {
       <Card className="max-w-2xl mx-auto">
         <CardContent className="text-center space-y-6 pt-6">
           <div className="flex justify-center">
-            <ServerOff className="size-12 text-destructive" />
+            <ServerOff className="size-18 text-destructive" />
           </div>
 
           <h1 className="text-3xl font-bold">Server Error (500)</h1>

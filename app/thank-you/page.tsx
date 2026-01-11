@@ -38,7 +38,7 @@ export default function ThankYou() {
       <Card className="max-w-2xl mx-auto">
         <CardContent className="text-center space-y-6 pt-6">
           <div className="flex justify-center">
-            <Heart className="size-12 text-primary" />
+            <Heart className="size-18 text-primary" />
           </div>
 
           <h1 className="text-3xl font-bold">
