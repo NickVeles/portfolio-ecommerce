@@ -1,6 +1,12 @@
 "use client";
 
-import { SignedIn, SignedOut, SignIn, UserButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  SignIn,
+  UserButton,
+  useAuth,
+} from "@clerk/nextjs";
 import { useState } from "react";
 import { CircleUser, LogIn } from "lucide-react";
 import {
@@ -12,6 +18,7 @@ import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
 
 export function ClerkSignInButton() {
+  const { isLoaded } = useAuth();
   const [showPopover, setShowPopover] = useState(false);
   const [showSignIn, setShowSignIn] = useState(false);
 
@@ -19,6 +26,10 @@ export function ClerkSignInButton() {
     setShowPopover(false);
     setShowSignIn(true);
   };
+
+  if (!isLoaded) {
+    return <Spinner className="size-7" />;
+  }
 
   return (
     <>
