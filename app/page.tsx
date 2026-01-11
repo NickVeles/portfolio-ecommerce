@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import RecentProducts from "@/components/RecentProducts";
 import { Spinner } from "@/components/ui/spinner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   return (
@@ -43,9 +44,16 @@ export default function Home() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           <Suspense
             fallback={
-              <div className="flex col-span-4 justify-center items-center py-16">
-                <Spinner className="size-8" />
-              </div>
+              <>
+                {Array.from({ length: 4 }).map((_, index) => (
+                  <Skeleton
+                    key={index}
+                    className="min-w-full min-h-105.5 rounded-xl opacity-50 flex justify-center items-center"
+                  >
+                    <Spinner className="size-8" />
+                  </Skeleton>
+                ))}
+              </>
             }
           >
             <RecentProducts />

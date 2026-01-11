@@ -16,6 +16,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition, Suspense } from "react";
 import ProductGrid from "./ProductGrid";
 import { Spinner } from "./ui/spinner";
+import { Skeleton } from "./ui/skeleton";
 
 interface ProductListProps {
   page: number;
@@ -195,8 +196,15 @@ function ProductList({
 
       <Suspense
         fallback={
-          <div className="flex justify-center items-center py-16">
-            <Spinner className="size-8" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 12 }).map((_, index) => (
+              <Skeleton
+                key={index}
+                className="min-w-full min-h-105.5 rounded-xl opacity-50 flex justify-center items-center"
+              >
+                <Spinner className="size-8" />
+              </Skeleton>
+            ))}
           </div>
         }
       >
