@@ -6,6 +6,7 @@ import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
 import { CartSheet } from "@/components/CartSheet";
 import { QueryProvider } from "@/components/providers/QueryProvider";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const poppinsSans = Poppins({
   variable: "--font-sans",
@@ -79,18 +80,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-screen flex-col bg-background`}
-      >
-        <QueryProvider>
-          <Toaster position="bottom-right" />
-          <CartSheet />
-          <Navbar />
-          <main className="grow container mx-auto px-4 py-8">{children}</main>
-          <Footer />
-        </QueryProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en">
+        <body
+          className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-screen flex-col bg-background`}
+        >
+          <QueryProvider>
+            <Toaster position="bottom-right" />
+            <CartSheet />
+            <Navbar />
+            <main className="grow container mx-auto px-4 py-8">{children}</main>
+            <Footer />
+          </QueryProvider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }
