@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Stripe } from "stripe";
 
 export const productKeys = {
@@ -50,7 +51,8 @@ export async function fetchProductMetadata(
   );
 
   if (!response.ok) {
-    throw new Error("Failed to fetch product metadata");
+    console.error("Failed to fetch product metadata");
+    redirect("/500");
   }
 
   return response.json();
@@ -62,7 +64,8 @@ export async function fetchRecentProducts(): Promise<RecentProductsResult> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch recent products");
+    console.error("Failed to fetch recent products");
+    redirect("/500");
   }
 
   return response.json();
