@@ -2,13 +2,14 @@ import ProductList from "@/components/ProductList";
 import { fetchProductMetadata } from "@/lib/queries/products";
 
 interface ProductsPageProps {
-  searchParams: Promise<{ page?: string; search?: string }>;
+  searchParams: Promise<{ page?: string; search?: string; sort?: string }>;
 }
 
 export default async function Products({ searchParams }: ProductsPageProps) {
   const params = await searchParams;
   const page = parseInt(params.page || "1", 10);
   const searchQuery = params.search || "";
+  const sortBy = params.sort || "newest";
 
   const { totalCount, totalPages } = await fetchProductMetadata(searchQuery);
 
@@ -27,6 +28,7 @@ export default async function Products({ searchParams }: ProductsPageProps) {
       <ProductList
         page={page}
         searchQuery={searchQuery}
+        sortBy={sortBy}
         totalPages={totalPages}
         totalCount={totalCount}
       />

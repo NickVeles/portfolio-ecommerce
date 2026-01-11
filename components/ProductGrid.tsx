@@ -11,12 +11,17 @@ import { useTransition, useState } from "react";
 interface ProductGridProps {
   page: number;
   searchQuery: string;
+  sortBy: string;
 }
 
-export default function ProductGrid({ page, searchQuery }: ProductGridProps) {
+export default function ProductGrid({
+  page,
+  searchQuery,
+  sortBy,
+}: ProductGridProps) {
   const { data } = useSuspenseQuery({
-    queryKey: productKeys.list(page, searchQuery),
-    queryFn: () => fetchProductsPage(page, searchQuery),
+    queryKey: productKeys.list(page, searchQuery, sortBy),
+    queryFn: () => fetchProductsPage(page, searchQuery, sortBy),
   });
 
   const router = useRouter();

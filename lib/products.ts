@@ -57,28 +57,75 @@ async function getAllProductIds(): Promise<string[]> {
   return allIds;
 }
 
+export type SortOption =
+  | "newest"
+  | "oldest"
+  | "price-high-low"
+  | "price-low-high";
+
+function sortProducts(
+  products: Stripe.Product[],
+  sortBy: SortOption = "newest"
+): Stripe.Product[] {
+  const sorted = [...products];
+
+  switch (sortBy) {
+    case "newest":
+      return sorted.sort((a, b) => b.created - a.created);
+    case "oldest":
+      return sorted.sort((a, b) => a.created - b.created);
+    case "price-high-low":
+      return sorted.sort((a, b) => {
+        const priceA =
+          typeof a.default_price === "object" && a.default_price?.unit_amount
+            ? a.default_price.unit_amount
+            : 0;
+        const priceB =
+          typeof b.default_price === "object" && b.default_price?.unit_amount
+            ? b.default_price.unit_amount
+            : 0;
+        return priceB - priceA;
+      });
+    case "price-low-high":
+      return sorted.sort((a, b) => {
+        const priceA =
+          typeof a.default_price === "object" && a.default_price?.unit_amount
+            ? a.default_price.unit_amount
+            : 0;
+        const priceB =
+          typeof b.default_price === "object" && b.default_price?.unit_amount
+            ? b.default_price.unit_amount
+            : 0;
+        return priceA - priceB;
+      });
+    default:
+      return sorted;
+  }
+}
+
 /**
  * Fetches a specific page of products with full details
  */
 export async function getProductsPage(
   page: number = 1,
-  searchQuery?: string
+  searchQuery?: string,
+  sortBy: SortOption = "newest"
 ): Promise<ProductPaginationResult> {
   // Get all product IDs
   const allProductIds = await getAllProductIds();
 
-  // Fetch full product details for all products if we need to search
-  let allProducts: Stripe.Product[] = [];
-  if (searchQuery) {
-    allProducts = await Promise.all(
-      allProductIds.map((id) =>
-        stripe.products.retrieve(id, {
-          expand: ["default_price"],
-        })
-      )
-    );
+  // For sorting, we need to fetch all products
+  // Fetch full product details for all products
+  let allProducts: Stripe.Product[] = await Promise.all(
+    allProductIds.map((id) =>
+      stripe.products.retrieve(id, {
+        expand: ["default_price"],
+      })
+    )
+  );
 
-    // Filter products by search query (search in name and description)
+  // Filter products by search query if provided
+  if (searchQuery) {
     const query = searchQuery.toLowerCase().trim();
     allProducts = allProducts.filter((product) => {
       const nameMatch = product.name.toLowerCase().includes(query);
@@ -89,8 +136,11 @@ export async function getProductsPage(
     });
   }
 
-  // Calculate pagination based on filtered or all products
-  const totalCount = searchQuery ? allProducts.length : allProductIds.length;
+  // Sort products
+  allProducts = sortProducts(allProducts, sortBy);
+
+  // Calculate pagination based on sorted products
+  const totalCount = allProducts.length;
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   // Validate page number
@@ -100,22 +150,8 @@ export async function getProductsPage(
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = Math.min(startIndex + ITEMS_PER_PAGE, totalCount);
 
-  let products: Stripe.Product[];
-
-  if (searchQuery) {
-    // Use already filtered products
-    products = allProducts.slice(startIndex, endIndex);
-  } else {
-    // Fetch full product details only for the current page
-    const pageProductIds = allProductIds.slice(startIndex, endIndex);
-    products = await Promise.all(
-      pageProductIds.map((id) =>
-        stripe.products.retrieve(id, {
-          expand: ["default_price"],
-        })
-      )
-    );
-  }
+  // Get products for current page
+  const products = allProducts.slice(startIndex, endIndex);
 
   return {
     products,

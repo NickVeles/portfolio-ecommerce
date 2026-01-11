@@ -1,4 +1,4 @@
-import { getProductsPage } from "@/lib/products";
+import { getProductsPage, SortOption } from "@/lib/products";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
@@ -6,8 +6,9 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const page = parseInt(searchParams.get("page") || "1", 10);
     const search = searchParams.get("search") || undefined;
+    const sort = (searchParams.get("sort") as SortOption) || "newest";
 
-    const result = await getProductsPage(page, search);
+    const result = await getProductsPage(page, search, sort);
 
     return NextResponse.json(result);
   } catch (error) {

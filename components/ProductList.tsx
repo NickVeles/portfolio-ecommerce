@@ -17,10 +17,12 @@ import { useState, useTransition, Suspense } from "react";
 import ProductGrid from "./ProductGrid";
 import { Spinner } from "./ui/spinner";
 import { Skeleton } from "./ui/skeleton";
+import { Combobox } from "./ui/combobox";
 
 interface ProductListProps {
   page: number;
   searchQuery: string;
+  sortBy: string;
   totalPages: number;
   totalCount: number;
 }
@@ -28,6 +30,7 @@ interface ProductListProps {
 function ProductList({
   page,
   searchQuery,
+  sortBy,
   totalPages,
   totalCount,
 }: ProductListProps) {
@@ -36,6 +39,15 @@ function ProductList({
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);
   const [isPending, startTransition] = useTransition();
+
+  const handleSortChange = (newSort: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("sort", newSort);
+    params.set("page", "1"); // Reset to page 1 when sorting changes
+    startTransition(() => {
+      router.push(`/products?${params.toString()}`);
+    });
+  };
 
   const createPageUrl = (page: number) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -168,7 +180,7 @@ function ProductList({
 
   return (
     <div className="w-full space-y-6">
-      <div className="w-full flex justify-center">
+      <div className="w-full flex flex-col sm:flex-row justify-center items-center gap-4">
         <form
           onSubmit={handleSearch}
           className="w-96 flex flex-nowrap items-center max-w-md"
@@ -190,6 +202,18 @@ function ProductList({
             <Search className="size-4" />
           </Button>
         </form>
+        <Combobox
+          options={[
+            { value: "newest", label: "Newest" },
+            { value: "oldest", label: "Oldest" },
+            { value: "price-high-low", label: "Price: High to Low" },
+            { value: "price-low-high", label: "Price: Low to High" },
+          ]}
+          value={sortBy}
+          onValueChange={handleSortChange}
+          placeholder="Sort by..."
+          disabled={isPending}
+        />
       </div>
 
       <PaginationControls />
@@ -208,7 +232,7 @@ function ProductList({
           </div>
         }
       >
-        <ProductGrid page={currentPage} searchQuery={searchQuery} />
+        <ProductGrid page={currentPage} searchQuery={searchQuery} sortBy={sortBy} />
       </Suspense>
 
       <PaginationControls />

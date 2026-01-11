@@ -3,8 +3,8 @@ import type { Stripe } from "stripe";
 export const productKeys = {
   all: ["products"] as const,
   lists: () => [...productKeys.all, "list"] as const,
-  list: (page?: number, search?: string) =>
-    [...productKeys.lists(), { page, search }] as const,
+  list: (page?: number, search?: string, sort?: string) =>
+    [...productKeys.lists(), { page, search, sort }] as const,
   recent: () => [...productKeys.all, "recent"] as const,
 };
 
@@ -70,11 +70,13 @@ export async function fetchRecentProducts(): Promise<RecentProductsResult> {
 
 export async function fetchProductsPage(
   page: number = 1,
-  searchQuery?: string
+  searchQuery?: string,
+  sortBy: string = "newest"
 ): Promise<ProductPaginationResult> {
   const params = new URLSearchParams({
     page: page.toString(),
     ...(searchQuery && { search: searchQuery }),
+    sort: sortBy,
   });
 
   const response = await fetch(`${getBaseUrl()}/api/products?${params}`, {
