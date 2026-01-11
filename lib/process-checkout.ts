@@ -29,20 +29,17 @@ export default async function processCheckout(
   // Merge location data
   const location = `${address}, ${city}`;
 
-  // Encode params for URL
-  const params = new URLSearchParams({
-    firstName,
-    location,
-    bought: "true",
-  });
-
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items,
     mode: "payment",
-    success_url: `${
-      process.env.NEXT_PUBLIC_BASE_URL
-    }/thank-you?${params.toString()}`,
+    // Store customer data in metadata instead of URL params
+    metadata: {
+      firstName,
+      location,
+    },
+    // Use Stripe's session_id placeholder - Stripe will replace it with actual session ID
+    success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout`,
   });
 
