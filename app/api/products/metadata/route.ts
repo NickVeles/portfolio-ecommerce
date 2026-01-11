@@ -1,5 +1,6 @@
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
+import type { Stripe } from "stripe";
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,11 +13,12 @@ export async function GET(request: NextRequest) {
     let startingAfter: string | undefined = undefined;
 
     while (hasMore) {
-      const response = await stripe.products.list({
-        limit: 100,
-        active: true,
-        ...(startingAfter && { starting_after: startingAfter }),
-      });
+      const response: Stripe.ApiList<Stripe.Product> =
+        await stripe.products.list({
+          limit: 100,
+          active: true,
+          ...(startingAfter && { starting_after: startingAfter }),
+        });
 
       allIds.push(...response.data.map((p) => p.id));
       hasMore = response.has_more;
