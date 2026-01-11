@@ -1,14 +1,10 @@
-import ProductCard from "@/components/ProductCard";
 import { Button } from "@/components/ui/button";
-import { stripe } from "@/lib/stripe";
 import Link from "next/link";
+import { Suspense } from "react";
+import RecentProducts from "@/components/RecentProducts";
+import { Spinner } from "@/components/ui/spinner";
 
-export default async function Home() {
-  const products = await stripe.products.list({
-    expand: ["data.default_price"],
-    limit: 4,
-  });
-
+export default function Home() {
   return (
     <div>
       <section
@@ -41,11 +37,19 @@ export default async function Home() {
         </div>
       </section>
       <section className="py-8">
-        <h2 className="text-2xl font-bold mb-6 text-center">Recent Additions</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Recent Additions
+        </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {products.data.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
+          <Suspense
+            fallback={
+              <div className="flex col-span-4 justify-center items-center py-16">
+                <Spinner className="size-8" />
+              </div>
+            }
+          >
+            <RecentProducts />
+          </Suspense>
         </div>
         <div className="flex justify-center">
           <Button asChild>

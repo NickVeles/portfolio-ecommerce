@@ -1,6 +1,5 @@
 "use client";
 
-import { Stripe } from "stripe";
 import ProductCard from "./ProductCard";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -16,20 +15,21 @@ import {
 } from "./ui/pagination";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useTransition } from "react";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { productKeys, fetchProductsPage } from "@/lib/queries/products";
 
 interface ProductListProps {
-  products: Stripe.Product[];
-  currentPage: number;
-  totalPages: number;
+  page: number;
   searchQuery: string;
 }
 
-function ProductList({
-  products,
-  currentPage,
-  totalPages,
-  searchQuery,
-}: ProductListProps) {
+function ProductList({ page, searchQuery }: ProductListProps) {
+  const { data } = useSuspenseQuery({
+    queryKey: productKeys.list(page, searchQuery),
+    queryFn: () => fetchProductsPage(page, searchQuery),
+  });
+
+  const { products, currentPage, totalPages, totalCount } = data;
   const router = useRouter();
   const searchParams = useSearchParams();
   const [searchInput, setSearchInput] = useState(searchQuery);

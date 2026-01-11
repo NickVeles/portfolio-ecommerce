@@ -4,11 +4,12 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import { Toaster } from "sonner";
 import { CartSheet } from "@/components/CartSheet";
+import { QueryProvider } from "@/components/providers/QueryProvider";
 
 const poppinsSans = Poppins({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"]
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
 });
 
 const robotoMono = Roboto_Mono({
@@ -31,10 +32,12 @@ export default function RootLayout({
       <body
         className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-full flex-col bg-background`}
       >
-        <Toaster position="bottom-right" />
-        <CartSheet />
-        <Navbar />
-        <main className="grow container mx-auto px-4 py-8">{children}</main>
+        <QueryProvider>
+          <Toaster position="bottom-right" />
+          <CartSheet />
+          <Navbar />
+          <main className="grow container mx-auto px-4 py-8">{children}</main>
+        </QueryProvider>
       </body>
     </html>
   );
