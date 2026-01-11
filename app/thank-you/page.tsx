@@ -4,8 +4,9 @@ import { useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
-import { CheckCircle2 } from "lucide-react";
+import { Heart } from "lucide-react";
 
 export default function ThankYou() {
   const router = useRouter();
@@ -33,29 +34,33 @@ export default function ThankYou() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-16">
-      <div className="max-w-2xl mx-auto text-center space-y-6">
-        <div className="flex justify-center">
-          <CheckCircle2 className="size-12 text-primary" />
-        </div>
+    <div className="container mx-auto py-16">
+      <Card className="max-w-2xl mx-auto">
+        <CardContent className="text-center space-y-6 pt-6">
+          <div className="flex justify-center">
+            <Heart className="size-12 text-primary" />
+          </div>
 
-        <h1 className="text-3xl font-bold">Payment Successful!</h1>
+          <h1 className="text-3xl font-bold">
+            Thank you for your purchase, {firstName}!
+          </h1>
 
-        <p className="text-xl text-muted-foreground">
-          Thank you for your purchase, {firstName}!
-        </p>
-        <p>We're working to ship your package to {location}.</p>
-
-        <div className="pt-8 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            You will receive an email confirmation shortly with your order
-            details and tracking information.
+          <p className="text-xl text-muted-foreground">
+            Your payment has been successful. We're working to ship your package
+            to {location}.
           </p>
-          <Button asChild variant="default">
-            <Link href="/products">Go Back to Store</Link>
-          </Button>
-        </div>
-      </div>
+
+          <div className="pt-8 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You will receive an email confirmation shortly with your order
+              details and tracking information.
+            </p>
+            <Button asChild variant="default">
+              <Link href="/products">Go Back to Store</Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
