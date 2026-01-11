@@ -39,7 +39,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://velbuy.nickveles.com",
+    url: "https://velbuy.vercel.com",
     siteName: "Velbuy",
     title: "Velbuy - Your Premier Online Shopping Destination",
     description:
