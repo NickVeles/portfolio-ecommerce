@@ -12,7 +12,7 @@ export default function About() {
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold">About This Project</h1>
             <p className="text-lg text-muted-foreground">
-              This is a portfolio e-commerce website built with modern web
+              This is a simple portfolio e-commerce website built with modern web
               technologies, featuring a fully functional shopping cart and
               secure payment processing powered by Stripe.
             </p>
