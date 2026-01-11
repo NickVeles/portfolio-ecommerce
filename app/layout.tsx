@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Poppins, Roboto_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import { Toaster } from "sonner";
 import { CartSheet } from "@/components/CartSheet";
 import { QueryProvider } from "@/components/providers/QueryProvider";
@@ -30,13 +31,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-full flex-col bg-background`}
+        className={`${poppinsSans.variable} ${robotoMono.variable} antialiased flex min-h-screen flex-col bg-background`}
       >
         <QueryProvider>
           <Toaster position="bottom-right" />
           <CartSheet />
           <Navbar />
           <main className="grow container mx-auto px-4 py-8">{children}</main>
+          <Footer />
         </QueryProvider>
       </body>
     </html>
