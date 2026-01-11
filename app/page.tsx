@@ -7,12 +7,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Home() {
   return (
-    <div>
+    <div className="space-y-8">
       <section
         className="rounded py-8 sm:py-12 lg:py-24 bg-cover bg-center bg-no-repeat relative"
         style={{ backgroundImage: "url('/banner.jpg')" }}
       >
-        <div className="absolute inset-0 bg-black/50 rounded"></div>
         <div className="flex items-center justify-around gap-8 px-8 sm:px-18 flex-wrap relative z-10">
           <div className="max-w-md space-y-4">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl text-white">
