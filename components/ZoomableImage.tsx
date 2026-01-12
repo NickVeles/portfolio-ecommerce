@@ -84,7 +84,7 @@ function ZoomableImage({ src, alt }: ZoomableImageProps) {
           {/* Close button */}
           <Button
             onClick={closeModal}
-            variant="secondary"
+            variant="destructive"
             size="icon"
             className="absolute top-4 right-4 z-50"
             aria-label="Close modal"
