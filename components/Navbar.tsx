@@ -3,7 +3,6 @@ import { Logo } from "./Icons";
 import { CartIcon } from "./CartIcon";
 import { TriangleAlert } from "lucide-react";
 import { ClerkSignInButton } from "./ClerkSignInButton";
-import { ClerkProvider } from "@clerk/nextjs";
 
 function Navbar() {
   return (
@@ -38,10 +37,7 @@ function Navbar() {
           </div>
           <div className="ml-6 flex justify-center items-center gap-6">
             <CartIcon />
-
-            <ClerkProvider>
-              <ClerkSignInButton />
-            </ClerkProvider>
+            <ClerkSignInButton />
           </div>
         </div>
       </nav>
