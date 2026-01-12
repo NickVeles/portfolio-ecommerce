@@ -55,7 +55,7 @@ export function DashboardSidebar() {
                       <SidebarMenuButton
                         asChild
                         isActive={isActive}
-                        className="gap-2 h-10"
+                        className="gap-2 h-10 p-3"
                       >
                         <Link href={item.href}>
                           <item.icon className="size-4" />
@@ -74,7 +74,7 @@ export function DashboardSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton
                 asChild
-                className="gap-2 h-10 text-destructive hover:text-destructive hover:bg-sidebar-accent cursor-pointer"
+                className="gap-2 h-10 p-3 text-destructive hover:text-destructive hover:bg-sidebar-accent cursor-pointer"
               >
                 <button onClick={handleSignOut}>
                   <LogOut className="size-4" />
