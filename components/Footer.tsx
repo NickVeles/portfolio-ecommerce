@@ -110,7 +110,7 @@ export default function Footer() {
         {/* Copyright */}
         <div className="border-t mt-8 pt-6 text-center text-sm text-muted-foreground">
           <p>
-            © {new Date().getFullYear()} Velbuy. Portfolio project by Nick
+            &copy; {new Date().getFullYear()} Velbuy. Portfolio project by Nick
             Veles.
           </p>
         </div>
