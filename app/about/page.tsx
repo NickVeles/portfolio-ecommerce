@@ -24,19 +24,32 @@ export default function About() {
           <div className="text-center space-y-4">
             <h1 className="text-3xl font-bold">About This Project</h1>
             <p className="text-lg text-muted-foreground">
-              This is a simple portfolio e-commerce website built with modern web
-              technologies, featuring a fully functional shopping cart and
-              secure payment processing powered by Stripe.
+              This is a simple portfolio e-commerce website built with modern
+              web technologies, featuring a fully functional shopping cart,
+              secure payment processing powered by Stripe, and a secure account system powered by Clerk.
             </p>
             <p className="text-muted-foreground">
               <Link
                 href="https://github.com/NickVeles/portfolio-ecommerce"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary hover:text-secondary transition-colors underline"
+                className="text-primary hover:text-secondary transition-colors underline underline-offset-2"
               >
                 View the source code on GitHub
               </Link>
+            </p>
+            <p>
+              If you want to test payments on this website, you may use any of
+              Stripe's{" "}
+              <Link
+                href="https://docs.stripe.com/testing#cards"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:text-secondary transition-colors underline underline-offset-2"
+              >
+                test cards
+              </Link>
+              .
             </p>
           </div>
 
