@@ -1,20 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
 import {
   Field,
   FieldDescription,
   FieldGroup,
   FieldLabel,
-} from "@/components/ui/field"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { useSignUp } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -65,7 +66,8 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
       toast.success("Verification code sent to your email");
     } catch (err: any) {
       console.error("Sign up error:", err);
-      const errorMessage = err.errors?.[0]?.message || "Failed to create account";
+      const errorMessage =
+        err.errors?.[0]?.message || "Failed to create account";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -92,7 +94,8 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
       }
     } catch (err: any) {
       console.error("Verification error:", err);
-      const errorMessage = err.errors?.[0]?.message || "Invalid verification code";
+      const errorMessage =
+        err.errors?.[0]?.message || "Invalid verification code";
       toast.error(errorMessage);
     } finally {
       setIsLoading(false);
@@ -153,7 +156,9 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
                   onClick={async () => {
                     if (!isLoaded || !signUp) return;
                     try {
-                      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+                      await signUp.prepareEmailAddressVerification({
+                        strategy: "email_code",
+                      });
                       toast.success("Code resent");
                     } catch (err) {
                       toast.error("Failed to resend code");
@@ -173,91 +178,100 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
   }
 
   return (
-    <Card {...props}>
-      <CardHeader>
-        <CardTitle>Create an account</CardTitle>
-        <CardDescription>
-          Enter your information below to create your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit}>
-          <FieldGroup>
-            <Field>
-              <FieldLabel htmlFor="name">Full Name</FieldLabel>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
-              <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-              <FieldDescription>
-                Must be at least 8 characters long.
-              </FieldDescription>
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="confirm-password">
-                Confirm Password
-              </FieldLabel>
-              <Input
-                id="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={isLoading}
-                required
-              />
-              <FieldDescription>Please confirm your password.</FieldDescription>
-            </Field>
-            <div id="clerk-captcha" />
+    <div className="flex flex-col gap-6 w-full" {...props}>
+      <Card>
+        <CardHeader>
+          <CardTitle>Create a Velbuy account</CardTitle>
+          <CardDescription>
+            Enter your information below to create your account
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
             <FieldGroup>
               <Field>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Creating Account..." : "Create Account"}
-                </Button>
-                <Button
-                  variant="outline"
-                  type="button"
-                  onClick={handleGoogleSignUp}
+                <FieldLabel htmlFor="name">Full Name</FieldLabel>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="John Doe"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   disabled={isLoading}
-                >
-                  <FontAwesomeIcon icon={faGoogle} />
-                  <span className="sr-only">Sign up with</span> Google
-                </Button>
-                <FieldDescription className="px-6 text-center">
-                  Already have an account? <Link href="/sign-in">Sign in</Link>
+                  required
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="email">Email</FieldLabel>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="m@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="password">Password</FieldLabel>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+                <FieldDescription>
+                  Must be at least 8 characters long.
                 </FieldDescription>
               </Field>
+              <Field>
+                <FieldLabel htmlFor="confirm-password">
+                  Confirm Password
+                </FieldLabel>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isLoading}
+                  required
+                />
+                <FieldDescription>
+                  Please confirm your password.
+                </FieldDescription>
+              </Field>
+              <div id="clerk-captcha" />
+              <FieldGroup>
+                <Field>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading ? "Creating Account..." : "Create Account"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    type="button"
+                    onClick={handleGoogleSignUp}
+                    disabled={isLoading}
+                  >
+                    <FontAwesomeIcon icon={faGoogle} />
+                    <span className="sr-only">Sign up with</span> Google
+                  </Button>
+                  <FieldDescription className="px-6 text-center">
+                    Already have an account?{" "}
+                    <Link href="/sign-in">Sign in</Link>
+                  </FieldDescription>
+                </Field>
+              </FieldGroup>
             </FieldGroup>
-          </FieldGroup>
-        </form>
-      </CardContent>
-    </Card>
-  )
+          </form>
+        </CardContent>
+      </Card>
+      <FieldDescription className="px-6 text-center">
+        By signing up, you agree to our{" "}
+        <Link href="/terms">Terms of Service</Link>
+      </FieldDescription>
+    </div>
+  );
 }
