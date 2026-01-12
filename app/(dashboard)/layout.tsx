@@ -16,9 +16,9 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex justify-center items-center">
-      <SidebarProvider defaultOpen={true} className="max-w-4xl">
+      <SidebarProvider defaultOpen={true} className="max-w-4xl min-h-0">
         <DashboardSidebar />
-        <SidebarInset className="min-h-0">
+        <SidebarInset>
           <div className="flex flex-1 flex-col w-full p-4">{children}</div>
         </SidebarInset>
       </SidebarProvider>
