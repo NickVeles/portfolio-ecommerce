@@ -3,7 +3,6 @@
 import {
   SignedIn,
   SignedOut,
-  UserButton,
   useAuth,
 } from "@clerk/nextjs";
 import { useState } from "react";
@@ -16,6 +15,7 @@ import {
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
 import Link from "next/link";
+import { ClerkUserButton } from "./ClerkUserButton";
 
 export function ClerkSignInButton() {
   const { isLoaded } = useAuth();
@@ -53,14 +53,7 @@ export function ClerkSignInButton() {
       </SignedOut>
 
       <SignedIn>
-        <UserButton
-          fallback={<Spinner className="size-6" />}
-          appearance={{
-            elements: {
-              avatarBox: { height: 24, width: 24 },
-            },
-          }}
-        />
+        <ClerkUserButton />
       </SignedIn>
     </>
   );
