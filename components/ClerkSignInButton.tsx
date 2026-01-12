@@ -3,7 +3,6 @@
 import {
   SignedIn,
   SignedOut,
-  SignIn,
   UserButton,
   useAuth,
 } from "@clerk/nextjs";
@@ -16,16 +15,11 @@ import {
 } from "@/components/ui/popover";
 import { Button } from "./ui/button";
 import { Spinner } from "./ui/spinner";
+import Link from "next/link";
 
 export function ClerkSignInButton() {
   const { isLoaded } = useAuth();
   const [showPopover, setShowPopover] = useState(false);
-  const [showSignIn, setShowSignIn] = useState(false);
-
-  const handleSignInClick = () => {
-    setShowPopover(false);
-    setShowSignIn(true);
-  };
 
   if (!isLoaded) {
     return <Spinner className="size-6" />;
@@ -45,26 +39,17 @@ export function ClerkSignInButton() {
           </PopoverTrigger>
           <PopoverContent className="w-48 p-2 z-50" align="end">
             <Button
-              onClick={handleSignInClick}
+              asChild
               variant="ghost"
               className="w-full flex gap-2 justify-start items-center"
             >
-              <LogIn className="size-4" />
-              Sign In
+              <Link href="/sign-in" onClick={() => setShowPopover(false)}>
+                <LogIn className="size-4" />
+                Sign In
+              </Link>
             </Button>
           </PopoverContent>
         </Popover>
-
-        {showSignIn && (
-          <div
-            className="fixed inset-0 bg-black/50 flex items-center justify-center z-100"
-            onClick={() => setShowSignIn(false)}
-          >
-            <div onClick={(e) => e.stopPropagation()}>
-              <SignIn routing="virtual" />
-            </div>
-          </div>
-        )}
       </SignedOut>
 
       <SignedIn>
