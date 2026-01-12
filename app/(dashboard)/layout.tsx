@@ -9,6 +9,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
   SidebarMenuButton,
@@ -47,7 +48,10 @@ export default function DashboardLayout({
     <div className="flex justify-center items-center">
     <SidebarProvider defaultOpen={true} className="max-w-4xl">
       <Sidebar collapsible="none" className="hidden md:flex">
-        <Card className="min-h-[600px] flex flex-col justify-between py-0">
+        <Card className="min-h-[600px] flex flex-col justify-between py-0 gap-2">
+          <SidebarHeader className="pb-0">
+            <h2 className="text-lg font-semibold px-2">Dashboard</h2>
+          </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
               <SidebarGroupContent>
