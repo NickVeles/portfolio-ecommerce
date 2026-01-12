@@ -9,6 +9,7 @@ import Link from "next/link";
 import { slugifyProduct } from "@/lib/utils";
 import processCheckout from "@/lib/process-checkout";
 import { useEffect, useState } from "react";
+import { redirect } from "next/navigation";
 
 export default function CheckoutClient() {
   const [mounted, setMounted] = useState(false);
@@ -19,20 +20,12 @@ export default function CheckoutClient() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return null;
+  if (totalPrice === 0 || items.length === 0) {
+    redirect("/");
   }
 
-  if (totalPrice === 0 || items.length === 0) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <h1 className="text-3xl font-bold mb-4">Nothing to check out!</h1>
-        <p className="text-muted-foreground mb-8">Your cart is empty.</p>
-        <Button asChild>
-          <Link href="/products">Continue Shopping</Link>
-        </Button>
-      </div>
-    );
+  if (!mounted) {
+    return null;
   }
 
   return (
