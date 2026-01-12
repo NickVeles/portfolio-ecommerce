@@ -1,0 +1,98 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+import { useClerk } from "@clerk/nextjs";
+import { ShoppingBag, Settings, LogOut } from "lucide-react";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+  SidebarProvider,
+  SidebarInset,
+} from "@/components/ui/sidebar";
+import Link from "next/link";
+import { Card } from "@/components/ui/card";
+
+const navigationItems = [
+  {
+    title: "Order History",
+    href: "/orders",
+    icon: ShoppingBag,
+  },
+  {
+    title: "User Settings",
+    href: "/settings",
+    icon: Settings,
+  },
+];
+
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  const pathname = usePathname();
+  const { signOut } = useClerk();
+
+  const handleSignOut = () => {
+    signOut();
+  };
+
+  return (
+    <div className="flex justify-center items-center">
+    <SidebarProvider defaultOpen={true} className="max-w-4xl">
+      <Sidebar collapsible="none" className="hidden md:flex">
+        <Card className="min-h-[600px] flex flex-col justify-between py-0">
+          <SidebarContent>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {navigationItems.map((item) => {
+                    const isActive = pathname === item.href;
+                    return (
+                      <SidebarMenuItem key={item.href}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive}
+                          className="gap-2 h-10"
+                        >
+                          <Link href={item.href}>
+                            <item.icon className="size-4" />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    );
+                  })}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </SidebarContent>
+          <SidebarFooter>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  className="gap-2 h-10 text-destructive hover:text-destructive hover:bg-sidebar-accent cursor-pointer"
+                >
+                  <button onClick={handleSignOut}>
+                    <LogOut className="size-4" />
+                    <span>Sign Out</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarFooter>
+        </Card>
+      </Sidebar>
+      <SidebarInset className="min-h-0">
+        <div className="flex flex-1 flex-col w-full p-4">{children}</div>
+      </SidebarInset>
+    </SidebarProvider></div>
+  );
+}
