@@ -11,14 +11,13 @@ import {
   FieldSeparator,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
 import Image from "next/image";
 import { useSignIn } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Google } from "./Icons";
 
 export function SignInForm({
   className,
@@ -134,7 +133,7 @@ export function SignInForm({
                   onClick={handleGoogleSignIn}
                   disabled={isLoading}
                 >
-                  <FontAwesomeIcon icon={faGoogle} />
+                  <Google />
                   <span className="sr-only">Login with</span> Google
                 </Button>
               </Field>

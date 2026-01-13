@@ -19,10 +19,8 @@ import { useSignUp } from "@clerk/nextjs";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faGoogle } from "@fortawesome/free-brands-svg-icons";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
+import { Google } from "./Icons";
 
 export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -255,7 +253,7 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
                     onClick={handleGoogleSignUp}
                     disabled={isLoading}
                   >
-                    <FontAwesomeIcon icon={faGoogle} />
+                    <Google />
                     <span className="sr-only">Sign up with</span> Google
                   </Button>
                   <FieldDescription className="px-6 text-center">
