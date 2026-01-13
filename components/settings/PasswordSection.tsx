@@ -65,6 +65,10 @@ export function PasswordSection() {
           signOutOfOtherSessions: true,
         });
       }
+
+      // Refresh the user session to prevent "additional verification" errors
+      await user?.reload();
+
       toast.success(
         hasPassword ? "Password updated successfully" : "Password set successfully"
       );

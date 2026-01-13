@@ -39,6 +39,9 @@ export function DeleteAccountSection() {
         newPassword: password,
       });
 
+      // Refresh the user session to prevent "additional verification" errors
+      await user?.reload();
+
       // If password is correct, proceed with deletion
       await user?.delete();
       toast.success("Account deleted successfully");
