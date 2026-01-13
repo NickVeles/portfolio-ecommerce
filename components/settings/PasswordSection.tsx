@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,6 +18,7 @@ import { toast } from "sonner";
 
 export function PasswordSection() {
   const { user } = useUser();
+  const { session } = useSession();
   const [showDialog, setShowDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -52,6 +53,13 @@ export function PasswordSection() {
     setIsLoading(true);
     try {
       if (hasPassword) {
+        // Verify user through password
+        await session?.startVerification({ level: "first_factor" });
+        await session?.attemptFirstFactorVerification({
+          strategy: "password",
+          password: currentPassword,
+        });
+
         // Update existing password
         await user?.updatePassword({
           currentPassword,
@@ -66,11 +74,10 @@ export function PasswordSection() {
         });
       }
 
-      // Refresh the user session to prevent "additional verification" errors
-      await user?.reload();
-
       toast.success(
-        hasPassword ? "Password updated successfully" : "Password set successfully"
+        hasPassword
+          ? "Password updated successfully"
+          : "Password set successfully"
       );
       setShowDialog(false);
       setCurrentPassword("");
@@ -164,7 +171,9 @@ export function PasswordSection() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={hasPassword ? "Enter new password" : "Enter password"}
+                placeholder={
+                  hasPassword ? "Enter new password" : "Enter password"
+                }
               />
             </div>
             <div className="space-y-2">
@@ -184,7 +193,11 @@ export function PasswordSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button onClick={handlePasswordChange} disabled={isLoading}>
