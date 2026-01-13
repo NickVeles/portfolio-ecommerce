@@ -91,7 +91,7 @@ export function ClerkUserButton() {
             </Button>
             <Button
               variant="ghost"
-              className="w-full justify-start gap-2 h-10 text-destructive hover:text-destructive"
+              className="w-full justify-start gap-2 h-10 text-destructive!"
               onClick={handleSignOut}
             >
               <LogOut className="size-4" />

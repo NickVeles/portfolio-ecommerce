@@ -55,9 +55,9 @@ export function DashboardSidebar() {
         </nav>
       </div>
         <Button
-          variant="destructive"
+          variant="ghost"
           onClick={handleSignOut}
-          className="h-10 w-full justify-start gap-3"
+          className="h-10 w-full justify-start gap-3 text-destructive!"
         >
           <LogOut className="size-4" />
           <span>Sign Out</span>
