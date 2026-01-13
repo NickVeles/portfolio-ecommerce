@@ -10,7 +10,7 @@ export default async function SignUpPage() {
   }
 
   return (
-    <div className="w-full flex justify-center items-center py-10">
+    <div className="w-full flex justify-center items-center">
       <div className="w-full max-w-sm">
         <SignUpForm />
       </div>
