@@ -118,7 +118,6 @@ export function SignInForm({
                   required
                 />
               </Field>
-              <div id="clerk-captcha" />
               <Field>
                 <Button type="submit" disabled={isLoading}>
                   {isLoading ? "Signing in..." : "Login"}
@@ -127,6 +126,7 @@ export function SignInForm({
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
+              <div id="clerk-captcha" className="hidden" />
               <Field>
                 <Button
                   variant="outline"

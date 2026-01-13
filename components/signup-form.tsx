@@ -241,7 +241,7 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
                   Please confirm your password.
                 </FieldDescription>
               </Field>
-              <div id="clerk-captcha" />
+              <div id="clerk-captcha" className="hidden" />
               <FieldGroup>
                 <Field>
                   <Button type="submit" disabled={isLoading}>
