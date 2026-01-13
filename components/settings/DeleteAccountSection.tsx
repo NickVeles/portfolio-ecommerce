@@ -82,7 +82,7 @@ export function DeleteAccountSection() {
               Delete Account
             </DialogTitle>
             <DialogDescription>
-              Enter your password to permanently delete your account. If you don't have a password, set it first in the password section.
+              Enter your password to permanently delete your account. If you don't have a password, set it in the password section first.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
