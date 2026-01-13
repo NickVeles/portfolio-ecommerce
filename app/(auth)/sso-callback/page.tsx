@@ -16,6 +16,7 @@ export default async function SSOCallback() {
         <Spinner className="size-8" />
         <p className="text-muted-foreground">Completing sign in...</p>
       </div>
+      <div id="clerk-captcha" className="sr-only" />
       <AuthenticateWithRedirectCallback />
     </div>
   );
