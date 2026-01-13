@@ -16,7 +16,7 @@ import {
 import { AlertTriangle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
-export function DangerZoneSection() {
+export function DeleteAccountSection() {
   const { user } = useUser();
   const [showDialog, setShowDialog] = useState(false);
   const [confirmation, setConfirmation] = useState("");
@@ -46,20 +46,10 @@ export function DangerZoneSection() {
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h2 className="text-lg font-semibold flex items-center gap-2 text-destructive">
-          <AlertTriangle className="size-5" />
-          Danger Zone
-        </h2>
-        <p className="text-sm text-muted-foreground mt-1">
-          Permanently delete your account and all associated data
-        </p>
-      </div>
-
+    <>
       <div className="p-4 border border-destructive rounded-lg bg-destructive/5">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-destructive">Delete Account</p>
+          <p className="text-sm font-medium text-destructive inline-flex items-center gap-1"><AlertTriangle className="size-4" /> Delete Account</p>
           <p className="text-xs text-muted-foreground">
             Once you delete your account, there is no going back. Please be
             certain.
@@ -99,7 +89,11 @@ export function DangerZoneSection() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={handleCancel} disabled={isLoading}>
+            <Button
+              variant="outline"
+              onClick={handleCancel}
+              disabled={isLoading}
+            >
               Cancel
             </Button>
             <Button
@@ -116,6 +110,6 @@ export function DangerZoneSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }

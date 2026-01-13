@@ -7,7 +7,7 @@ import { PersonalInformationSection } from "@/components/settings/PersonalInform
 import { EmailSection } from "@/components/settings/EmailSection";
 import { GoogleAccountSection } from "@/components/settings/GoogleAccountSection";
 import { PasswordSection } from "@/components/settings/PasswordSection";
-import { DangerZoneSection } from "@/components/settings/DangerZoneSection";
+import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection";
 
 export default function Settings() {
   const { isLoaded } = useUser();
@@ -33,7 +33,7 @@ export default function Settings() {
       <EmailSection isGoogleConnected={isGoogleConnected} />
       <GoogleAccountSection onConnectionChange={setIsGoogleConnected} />
       <PasswordSection />
-      <DangerZoneSection />
+      <DeleteAccountSection />
     </div>
   );
 }
