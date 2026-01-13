@@ -30,7 +30,8 @@ export function GoogleAccountSection({
   const [isConnected, setIsConnected] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [showDialog, setShowDialog] = useState(false);
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false);
+  const [showConnectDialog, setShowConnectDialog] = useState(false);
   const [password, setPassword] = useState("");
 
   useEffect(() => {
@@ -46,6 +47,11 @@ export function GoogleAccountSection({
   }, [user, onConnectionChange]);
 
   const handleConnect = async () => {
+    if (!password) {
+      toast.error("Please enter your password");
+      return;
+    }
+
     setIsLoading(true);
     try {
       // Verify user through password
@@ -69,8 +75,11 @@ export function GoogleAccountSection({
       }
     } catch (error) {
       console.error("Failed to connect Google:", error);
+      toast.error("Failed to connect. Please check your password.");
     } finally {
       setIsLoading(false);
+      setShowConnectDialog(false);
+      setPassword("");
     }
   };
 
@@ -99,7 +108,7 @@ export function GoogleAccountSection({
         setGoogleEmail("");
         onConnectionChange(false);
         toast.success("Google account disconnected");
-        setShowDialog(false);
+        setShowDisconnectDialog(false);
         setPassword("");
       }
     } catch (error) {
@@ -110,12 +119,24 @@ export function GoogleAccountSection({
     }
   };
 
-  const handleCancel = () => {
-    setShowDialog(false);
+  const handleCancelConnect = () => {
+    setShowConnectDialog(false);
     setPassword("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleCancelDisconnect = () => {
+    setShowDisconnectDialog(false);
+    setPassword("");
+  };
+
+  const handleKeyDownConnect = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !isLoading && password) {
+      e.preventDefault();
+      handleConnect();
+    }
+  };
+
+  const handleKeyDownDisconnect = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !isLoading && password) {
       e.preventDefault();
       handleDisconnect();
@@ -154,22 +175,68 @@ export function GoogleAccountSection({
         {isConnected ? (
           <Button
             variant="outline"
-            onClick={() => setShowDialog(true)}
+            onClick={() => setShowDisconnectDialog(true)}
             disabled={isLoading}
           >
             {isLoading ? <Spinner className="size-5" /> : "Disconnect"}
           </Button>
         ) : (
-          <Button onClick={handleConnect} disabled={isLoading}>
+          <Button onClick={() => setShowConnectDialog(true)} disabled={isLoading}>
             {isLoading ? <Spinner className="size-5" /> : "Connect"}
           </Button>
         )}
       </div>
 
       <Dialog
-        open={showDialog}
+        open={showConnectDialog}
         onOpenChange={(value) => {
-          setShowDialog(value);
+          setShowConnectDialog(value);
+          setPassword("");
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Connect Google Account</DialogTitle>
+            <DialogDescription>
+              Enter your password to verify your identity before connecting your Google account. If you
+              don't have a password, set it in the password section first.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="connect-password">Password</Label>
+              <Input
+                id="connect-password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDownConnect}
+                placeholder="Enter your password"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={handleCancelConnect}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleConnect}
+              disabled={isLoading || !password}
+            >
+              {isLoading ? <Spinner className="size-4" /> : "Connect"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog
+        open={showDisconnectDialog}
+        onOpenChange={(value) => {
+          setShowDisconnectDialog(value);
           setPassword("");
         }}
       >
@@ -183,13 +250,13 @@ export function GoogleAccountSection({
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="disconnect-password">Password</Label>
               <Input
-                id="password"
+                id="disconnect-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
+                onKeyDown={handleKeyDownDisconnect}
                 placeholder="Enter your password"
               />
             </div>
@@ -197,7 +264,7 @@ export function GoogleAccountSection({
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={handleCancel}
+              onClick={handleCancelDisconnect}
               disabled={isLoading}
             >
               Cancel
