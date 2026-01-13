@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,31 +19,41 @@ import { toast } from "sonner";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
+  const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
-  const [confirmation, setConfirmation] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDelete = async () => {
-    if (confirmation !== "DELETE") {
-      toast.error('Please type "DELETE" to confirm');
+    if (!password) {
+      toast.error("Please enter your password");
       return;
     }
 
     setIsLoading(true);
     try {
+      // Verify password before deletion
+      await user?.updatePassword({
+        currentPassword: password,
+        newPassword: password,
+      });
+
+      // If password is correct, proceed with deletion
       await user?.delete();
       toast.success("Account deleted successfully");
-      // User will be redirected automatically by Clerk
+
+      // Redirect to home page
+      router.push("/");
     } catch (error) {
       console.error("Error deleting account:", error);
-      toast.error("Failed to delete account");
+      toast.error("Failed to delete account. Please check your password.");
       setIsLoading(false);
     }
   };
 
   const handleCancel = () => {
     setShowDialog(false);
-    setConfirmation("");
+    setPassword("");
   };
 
   return (
@@ -71,20 +82,18 @@ export function DeleteAccountSection() {
               Delete Account
             </DialogTitle>
             <DialogDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove all your data from our servers.
+              Enter your password to permanently delete your account. If you don't have a password, set it first in the password section.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="deleteConfirmation">
-                Type <span className="font-bold">DELETE</span> to confirm
-              </Label>
+              <Label htmlFor="password">Password</Label>
               <Input
-                id="deleteConfirmation"
-                value={confirmation}
-                onChange={(e) => setConfirmation(e.target.value)}
-                placeholder="DELETE"
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
               />
             </div>
           </div>
@@ -99,7 +108,7 @@ export function DeleteAccountSection() {
             <Button
               variant="destructive"
               onClick={handleDelete}
-              disabled={isLoading || confirmation !== "DELETE"}
+              disabled={isLoading || !password}
             >
               {isLoading ? (
                 <Loader2 className="size-4 animate-spin" />
