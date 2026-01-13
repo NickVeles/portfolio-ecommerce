@@ -126,7 +126,7 @@ export function SignInForm({
               <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
                 Or continue with
               </FieldSeparator>
-              <div id="clerk-captcha" className="hidden" />
+              <div id="clerk-captcha" className="sr-only" />
               <Field>
                 <Button
                   variant="outline"
