@@ -3,9 +3,10 @@
 import { useState, useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 import { Google } from "../Icons";
+import { Spinner } from "../ui/spinner";
 
 interface GoogleAccountSectionProps {
   onConnectionChange: (connected: boolean) => void;
@@ -106,19 +107,11 @@ export function GoogleAccountSection({
             onClick={handleDisconnect}
             disabled={isLoading}
           >
-            {isLoading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              "Disconnect"
-            )}
+            {isLoading ? <Spinner className="size-5" /> : "Disconnect"}
           </Button>
         ) : (
           <Button onClick={handleConnect} disabled={isLoading}>
-            {isLoading ? (
-              <Loader2 className="size-4 animate-spin" />
-            ) : (
-              "Connect"
-            )}
+            {isLoading ? <Spinner className="size-5" /> : "Connect"}
           </Button>
         )}
       </div>
