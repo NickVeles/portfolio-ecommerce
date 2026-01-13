@@ -88,7 +88,13 @@ export function DeleteAccountSection() {
         </div>
       </div>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog
+        open={showDialog}
+        onOpenChange={(value) => {
+          setShowDialog(value);
+          setPassword("");
+        }}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle className="text-destructive">
