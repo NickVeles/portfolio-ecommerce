@@ -1,7 +1,7 @@
-import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { Card } from "@/components/ui/card";
 
 export default async function DashboardLayout({
   children,
@@ -16,12 +16,14 @@ export default async function DashboardLayout({
 
   return (
     <div className="flex justify-center items-center">
-      <SidebarProvider defaultOpen={true} className="max-w-4xl min-h-0">
-        <DashboardSidebar />
-        <SidebarInset>
-          <div className="flex flex-1 flex-col w-full p-4">{children}</div>
-        </SidebarInset>
-      </SidebarProvider>
+      <Card className="max-w-4xl w-full py-0 overflow-hidden">
+        <div className="flex min-h-[600px] h-full">
+          <DashboardSidebar />
+          <div className="flex-1 p-4 flex flex-col">
+            {children}
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

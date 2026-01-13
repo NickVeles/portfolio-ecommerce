@@ -4,18 +4,8 @@ import { usePathname } from "next/navigation";
 import { useClerk } from "@clerk/nextjs";
 import { ShoppingBag, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
-import { Card } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const navigationItems = [
   {
@@ -39,52 +29,39 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar collapsible="none" className="hidden md:flex">
-      <Card className="min-h-[600px] flex flex-col justify-between py-0 gap-2">
-        <SidebarHeader className="pb-0">
-          <h2 className="text-lg font-semibold px-2">Dashboard</h2>
-        </SidebarHeader>
-        <SidebarContent>
-          <SidebarGroup>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {navigationItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <SidebarMenuItem key={item.href}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        className="gap-2 h-10 p-3"
-                      >
-                        <Link href={item.href}>
-                          <item.icon className="size-4" />
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        </SidebarContent>
-        <SidebarFooter>
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
+    <div className="hidden md:flex md:flex-col border-r w-64 shrink-0 p-4 gap-2">
+        <h2 className="text-lg font-semibold">Dashboard</h2>
+      <div className="flex-1">
+        <nav className="space-y-1 *:h-10">
+          {navigationItems.map((item) => {
+            const isActive = pathname === item.href;
+            return (
+              <Button
+                key={item.href}
+                variant="ghost"
                 asChild
-                className="gap-2 h-10 p-3 text-destructive hover:text-destructive hover:bg-sidebar-accent cursor-pointer"
+                className={cn(
+                  "w-full justify-start gap-3",
+                  isActive && "bg-accent text-accent-foreground"
+                )}
               >
-                <button onClick={handleSignOut}>
-                  <LogOut className="size-4" />
-                  <span>Sign Out</span>
-                </button>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarFooter>
-      </Card>
-    </Sidebar>
+                <Link href={item.href}>
+                  <item.icon className="size-4" />
+                  <span>{item.title}</span>
+                </Link>
+              </Button>
+            );
+          })}
+        </nav>
+      </div>
+        <Button
+          variant="destructive"
+          onClick={handleSignOut}
+          className="h-10 w-full justify-start gap-3"
+        >
+          <LogOut className="size-4" />
+          <span>Sign Out</span>
+        </Button>
+    </div>
   );
 }
