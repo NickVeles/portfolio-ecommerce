@@ -181,7 +181,10 @@ export function GoogleAccountSection({
             {isLoading ? <Spinner className="size-5" /> : "Disconnect"}
           </Button>
         ) : (
-          <Button onClick={() => setShowConnectDialog(true)} disabled={isLoading}>
+          <Button
+            onClick={() => setShowConnectDialog(true)}
+            disabled={isLoading}
+          >
             {isLoading ? <Spinner className="size-5" /> : "Connect"}
           </Button>
         )}
@@ -198,8 +201,9 @@ export function GoogleAccountSection({
           <DialogHeader>
             <DialogTitle>Connect Google Account</DialogTitle>
             <DialogDescription>
-              Enter your password to verify your identity before connecting your Google account. If you
-              don't have a password, set it in the password section first.
+              Enter your password to verify your identity before connecting your
+              Google account. If you don't have a password, set it in the
+              password section first.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -223,10 +227,7 @@ export function GoogleAccountSection({
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleConnect}
-              disabled={isLoading || !password}
-            >
+            <Button onClick={handleConnect} disabled={isLoading || !password}>
               {isLoading ? <Spinner className="size-4" /> : "Connect"}
             </Button>
           </DialogFooter>
