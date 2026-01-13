@@ -54,6 +54,7 @@ export function GoogleAccountSection({
     } catch (error) {
       console.error("Error connecting Google:", error);
       toast.error("Failed to connect Google account");
+    } finally {
       setIsLoading(false);
     }
   };
@@ -125,7 +126,7 @@ export function GoogleAccountSection({
         <div className="flex items-center gap-3">
           {isConnected ? (
             <>
-              <CheckCircle2 className="size-5 text-green-600" />
+              <CheckCircle2 className="size-5 text-primary" />
               <div>
                 <p className="text-sm font-medium">Connected</p>
                 <p className="text-xs text-muted-foreground">{googleEmail}</p>
