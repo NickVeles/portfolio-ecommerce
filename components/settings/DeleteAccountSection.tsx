@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession, useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ import { Spinner } from "../ui/spinner";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
+  const { session } = useSession();
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
   const [password, setPassword] = useState("");
@@ -33,14 +34,18 @@ export function DeleteAccountSection() {
 
     setIsLoading(true);
     try {
+      // Verify user through password
+      await session?.startVerification({ level: "first_factor" });
+      await session?.attemptFirstFactorVerification({
+        strategy: "password",
+        password,
+      });
+
       // Verify password before deletion
       await user?.updatePassword({
         currentPassword: password,
         newPassword: password,
       });
-
-      // Refresh the user session to prevent "additional verification" errors
-      await user?.reload();
 
       // If password is correct, proceed with deletion
       await user?.delete();

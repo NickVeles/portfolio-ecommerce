@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useSession, useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,7 @@ export function GoogleAccountSection({
   onConnectionChange,
 }: GoogleAccountSectionProps) {
   const { user } = useUser();
+  const { session } = useSession();
   const [isConnected, setIsConnected] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -47,13 +48,27 @@ export function GoogleAccountSection({
   const handleConnect = async () => {
     setIsLoading(true);
     try {
-      await user?.createExternalAccount({
-        strategy: "oauth_google",
-        redirectUrl: window.location.href,
+      // Verify user through password
+      await session?.startVerification({ level: "first_factor" });
+      await session?.attemptFirstFactorVerification({
+        strategy: "password",
+        password,
       });
+
+      // Create an external account connection
+      const externalAccount = await user?.createExternalAccount({
+        strategy: "oauth_google",
+        redirectUrl: "/settings",
+      });
+
+      // Redirect to Google's OAuth flow
+      const url =
+        externalAccount?.verification?.externalVerificationRedirectURL;
+      if (url) {
+        window.location.replace(url);
+      }
     } catch (error) {
-      console.error("Error connecting Google:", error);
-      toast.error("Failed to connect Google account");
+      console.error("Failed to connect Google:", error);
     } finally {
       setIsLoading(false);
     }
@@ -67,22 +82,19 @@ export function GoogleAccountSection({
 
     setIsLoading(true);
     try {
-      // Verify password before disconnection
-      await user?.updatePassword({
-        currentPassword: password,
-        newPassword: password,
+      // Verify user through password
+      await session?.startVerification({ level: "first_factor" });
+      await session?.attemptFirstFactorVerification({
+        strategy: "password",
+        password,
       });
 
-      // If password is correct, proceed with disconnection
+      // Find connection and delete
       const googleAccount = user?.externalAccounts?.find(
         (account) => account.provider === "google"
       );
       if (googleAccount) {
         await googleAccount.destroy();
-
-        // Refresh the user session to prevent "additional verification" errors
-        await user?.reload();
-
         setIsConnected(false);
         setGoogleEmail("");
         onConnectionChange(false);
