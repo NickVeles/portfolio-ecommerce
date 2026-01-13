@@ -45,6 +45,7 @@ export function PasswordSection() {
       await user?.updatePassword({
         currentPassword,
         newPassword,
+        signOutOfOtherSessions: true,
       });
       toast.success("Password updated successfully");
       setShowDialog(false);
@@ -93,7 +94,7 @@ export function PasswordSection() {
           <DialogHeader>
             <DialogTitle>Change Password</DialogTitle>
             <DialogDescription>
-              Enter your current password and choose a new one
+              You will be signed out of all other devices.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
