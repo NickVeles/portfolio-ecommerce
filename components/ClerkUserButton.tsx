@@ -42,7 +42,7 @@ export function ClerkUserButton() {
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
-          className="relative focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+          className="relative focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 rounded-md"
           aria-label="User menu"
         >
           <Avatar className="size-6 cursor-pointer hover:opacity-80 transition-opacity rounded-md">
