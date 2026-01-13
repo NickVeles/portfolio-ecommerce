@@ -60,6 +60,13 @@ export function DeleteAccountSection() {
     setPassword("");
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !isLoading && password) {
+      e.preventDefault();
+      handleDelete();
+    }
+  };
+
   return (
     <>
       <div className="p-4 border border-destructive rounded-lg bg-destructive/5">
@@ -100,6 +107,7 @@ export function DeleteAccountSection() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={handleKeyDown}
                 placeholder="Enter your password"
               />
             </div>
