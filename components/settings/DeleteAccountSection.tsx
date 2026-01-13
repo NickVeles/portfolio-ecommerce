@@ -14,8 +14,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
+import { Spinner } from "../ui/spinner";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
@@ -60,7 +61,9 @@ export function DeleteAccountSection() {
     <>
       <div className="p-4 border border-destructive rounded-lg bg-destructive/5">
         <div className="space-y-2">
-          <p className="text-sm font-medium text-destructive inline-flex items-center gap-1"><AlertTriangle className="size-4" /> Delete Account</p>
+          <p className="text-sm font-medium text-destructive inline-flex items-center gap-1">
+            <AlertTriangle className="size-4" /> Delete Account
+          </p>
           <p className="text-xs text-muted-foreground">
             Once you delete your account, there is no going back. Please be
             certain.
@@ -82,7 +85,8 @@ export function DeleteAccountSection() {
               Delete Account
             </DialogTitle>
             <DialogDescription>
-              Enter your password to permanently delete your account. If you don't have a password, set it in the password section first.
+              Enter your password to permanently delete your account. If you
+              don't have a password, set it in the password section first.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -110,11 +114,7 @@ export function DeleteAccountSection() {
               onClick={handleDelete}
               disabled={isLoading || !password}
             >
-              {isLoading ? (
-                <Loader2 className="size-4 animate-spin" />
-              ) : (
-                "Delete Account"
-              )}
+              {isLoading ? <Spinner className="size-4" /> : "Delete Account"}
             </Button>
           </DialogFooter>
         </DialogContent>
