@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useUser, useSession } from "@clerk/nextjs";
+import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { EmailAddressResource } from "@clerk/types";
+import { Mail } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -13,37 +14,136 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Mail } from "lucide-react";
-import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Spinner } from "../ui/spinner";
 import CodeDialog from "../CodeDialog";
-import { EmailAddressResource } from "@clerk/types";
+import {
+  ReverificationDialog,
+  useReverificationDialog,
+} from "../ReverificationDialog";
+import { handleClerkError } from "@/lib/clerk";
+
+const RESEND_COOLDOWN_SECONDS = 45;
 
 export function EmailSection() {
   const { user } = useUser();
-  const { session } = useSession();
   const [showEmailChangeDialog, setShowEmailChangeDialog] = useState(false);
   const [showCodeDialog, setShowCodeDialog] = useState(false);
   const [newEmailObject, setNewEmailObject] =
     useState<EmailAddressResource | null>(null);
-  const [password, setPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
 
-  const currentEmail = user?.emailAddresses[0]?.emailAddress || "";
-  const isNewEmailVerified =
-    user?.emailAddresses[0]?.verification?.status === "verified";
-  const isNewEmailPrimary =
-    user?.emailAddresses[0]?.id === user?.primaryEmailAddress?.id;
-  const hasPassword = user?.passwordEnabled ?? false;
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
-  const handleEmailChange = async () => {
-    // Validate password if user has one
-    if (hasPassword && !password) {
-      toast.error("Password is required");
-      return;
+  const currentEmail = user?.primaryEmailAddress?.emailAddress || "";
+  const hasGoogleAccount = user?.externalAccounts?.some(
+    (account) => account.provider === "google"
+  );
+
+  const handleChangeEmailButtonClick = () => {
+    if (hasGoogleAccount) {
+      toast.error("Disconnect your Google account to change email.");
+    } else {
+      setShowEmailChangeDialog(true);
     }
+  };
+
+  const createEmailAddress = async () => {
+    // Remove non-primary email addresses
+    await Promise.all(
+      user?.emailAddresses
+        .filter((e) => e.id !== user?.primaryEmailAddress?.id)
+        .map((e) => e.destroy()) || []
+    );
+
+    // Create new email
+    const res = await user?.createEmailAddress({ email: newEmail.trim() });
+
+    // Send verification
+    res?.prepareVerification({
+      strategy: "email_code",
+    });
+
+    setNewEmailObject(res!);
+    setResendCooldown(RESEND_COOLDOWN_SECONDS);
+
+    toast.success(
+      "Verification email sent. Please check your inbox to verify your new email."
+    );
+
+    setShowEmailChangeDialog(false);
+    setShowCodeDialog(true);
+  };
+
+  const handleResendCode = async () => {
+    if (!newEmailObject) return;
+    try {
+      await newEmailObject.prepareVerification({
+        strategy: "email_code",
+      });
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
+      toast.success("Verification code resent.");
+    } catch (error) {
+      handleClerkError(error, "Failed to resend code.");
+    }
+  };
+
+  const { execute, dialogProps } = useReverificationDialog({
+    action: createEmailAddress,
+    onSuccess: () => {
+      // Success handling is done in createEmailAddress
+    },
+    onError: (error) => {
+      toast.error("Failed to update email");
+      console.error(error);
+    },
+    onCancel: () => {
+      toast.info("Email change cancelled");
+    },
+  });
+
+  const setPrimaryEmail = async () => {
+    // Set new primary email
+    await user?.update({ primaryEmailAddressId: newEmailObject!.id });
+
+    // Reload the user
+    await user?.reload();
+
+    // Delete non-primary email addresses if present
+    await Promise.all(
+      user?.emailAddresses
+        .filter((e) => e.id !== newEmailObject!.id)
+        .map((e) => e.destroy()) || []
+    );
+  };
+
+  const { execute: executeSetPrimary, dialogProps: verifyDialogProps } =
+    useReverificationDialog({
+      action: setPrimaryEmail,
+      onSuccess: () => {
+        toast.success("Email updated successfully");
+        setShowCodeDialog(false);
+        setNewEmail("");
+      },
+      onError: (error) => {
+        toast.error("Failed to set primary email");
+        console.error(error);
+      },
+      onCancel: () => {
+        toast.info("Email verification cancelled");
+      },
+    });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
     if (!newEmail.trim() || !newEmail.includes("@")) {
       toast.error("Please enter a valid email address");
@@ -62,113 +162,36 @@ export function EmailSection() {
 
     setIsLoading(true);
     try {
-      // Verify user through password
-      await session?.startVerification({ level: "first_factor" });
-      await session?.attemptFirstFactorVerification({
-        strategy: "password",
-        password,
-      });
-
-      // Create new email address
-      const res = await user?.createEmailAddress({ email: newEmail.trim() });
-
-      // Send verification
-      res?.prepareVerification({
-        strategy: "email_code",
-      });
-
-      setNewEmailObject(res!);
-
-      toast.success(
-        "Verification email sent. Please check your inbox to verify your new email."
-      );
-
-      setShowEmailChangeDialog(false);
-      setShowCodeDialog(true);
+      await execute();
     } catch (error) {
-      console.error("Error updating email:", error);
-      toast.error("Failed to update email. Check your password and try again.");
-      setIsLoading(false);
+      handleClerkError(error, "Failed to update email.");
     } finally {
-      setPassword("");
-      setNewEmail("");
+      setIsLoading(false);
       setConfirmEmail("");
     }
   };
 
-  const handleReverify = async () => {
-    try {
-      const res = user?.emailAddresses[0]!;
-
-      // Send verification
-      res?.prepareVerification({
-        strategy: "email_code",
-      });
-
-      setNewEmailObject(res!);
-
-      toast.success(
-        "Verification email sent. Please check your inbox to verify your new email."
-      );
-
-      setShowCodeDialog(true);
-    } catch (error) {
-      console.error("Error sending verification:", error);
-      toast.error("Failed to send verification.");
-    }
-  };
-
   const handleVerify = async (code: string) => {
+    setIsLoading(true);
     try {
       // Verify through code
       await newEmailObject?.attemptVerification({ code });
 
-      // Set new primary email
-      user?.update({ primaryEmailAddressId: newEmailObject!.id });
-
-      // Reload the user
-      await user?.reload();
-
-      // Delete all other emails
-      user?.emailAddresses
-        .filter((e) => e.id !== newEmailObject!.id)
-        .map(async (e) => {
-          await e.destroy();
-        });
+      // Set primary email (may trigger reverification)
+      await executeSetPrimary();
     } catch (error) {
-      console.error("Error updating primary email:", error);
-      toast.error("Fail to verify the email.");
+      handleClerkError(error, "Failed to verify the email.");
     } finally {
       setIsLoading(false);
-      setShowCodeDialog(false);
     }
   };
 
   const handleCancel = async () => {
     setShowEmailChangeDialog(false);
     setShowCodeDialog(false);
-    setPassword("");
     setNewEmail("");
     setConfirmEmail("");
     setIsLoading(false);
-
-    try {
-      // Delete all non-primary emails
-      user?.emailAddresses
-        .filter((e) => e.id !== user.primaryEmailAddress?.id)
-        .map(async (e) => {
-          await e.destroy();
-        });
-    } catch (error) {
-      console.error("Error handling cancel event:", error);
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isLoading) {
-      e.preventDefault();
-      handleEmailChange();
-    }
   };
 
   return (
@@ -190,84 +213,73 @@ export function EmailSection() {
         </div>
         <Button
           variant="outline"
-          onClick={() => setShowEmailChangeDialog(true)}
+          onClick={handleChangeEmailButtonClick}
         >
           Change Email
         </Button>
       </div>
-
-      {isNewEmailVerified && !isNewEmailPrimary && (
-        <Button variant="link" onClick={() => handleReverify}>
-          Complete Verification
-        </Button>
-      )}
 
       <Dialog
         open={showEmailChangeDialog}
         onOpenChange={setShowEmailChangeDialog}
       >
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Change Email</DialogTitle>
-            <DialogDescription>
-              You will receive a verification email at your new address. If you
-              don't have a password, set it in the password section first.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter your password"
-              />
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>Change Email</DialogTitle>
+              <DialogDescription>
+                You will receive a verification email at your new address.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="newEmail">New Email</Label>
+                <Input
+                  id="newEmail"
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                  placeholder="Enter new email"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmEmail">Confirm New Email</Label>
+                <Input
+                  id="confirmEmail"
+                  type="email"
+                  value={confirmEmail}
+                  onChange={(e) => setConfirmEmail(e.target.value)}
+                  placeholder="Confirm new email"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="newEmail">New Email</Label>
-              <Input
-                id="newEmail"
-                type="email"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter new email"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmEmail">Confirm New Email</Label>
-              <Input
-                id="confirmEmail"
-                type="email"
-                value={confirmEmail}
-                onChange={(e) => setConfirmEmail(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Confirm new email"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handleEmailChange} disabled={isLoading}>
-              {isLoading ? <Spinner className="size-4" /> : "Update Email"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? <Spinner className="size-4" /> : "Update Email"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
+
+      <ReverificationDialog {...dialogProps} />
+      <ReverificationDialog {...verifyDialogProps} />
 
       <CodeDialog
         open={showCodeDialog}
         onOpenChange={handleCancel}
         onSubmit={handleVerify}
+        onResend={handleResendCode}
+        resendCooldown={resendCooldown}
+        description={`Please enter the OTP code sent to ${newEmail}`}
       />
     </div>
   );
