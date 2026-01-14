@@ -96,7 +96,6 @@ export function PasswordSection() {
     setIsLoading(true);
     try {
       await execute();
-      toast.success("Password updated successfully.");
       setShowDialog(false);
     } catch (error) {
       handleClerkError(error, "Failed to update password.");
