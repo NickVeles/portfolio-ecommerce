@@ -68,7 +68,9 @@ export function PasswordSection() {
     },
   });
 
-  const handlePasswordChange = async () => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
     // Validate required fields based on whether user has existing password
     if (hasPassword && !currentPassword) {
       toast.error("Current password is required");
@@ -148,76 +150,79 @@ export function PasswordSection() {
         onOpenChange={setShowPasswordChangeDialog}
       >
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
-              {hasPassword ? "Change Password" : "Set Password"}
-            </DialogTitle>
-            <DialogDescription>
-              {hasPassword
-                ? "You will be signed out of all other devices."
-                : "Set a password to enable password-based login."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            {hasPassword && (
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>
+                {hasPassword ? "Change Password" : "Set Password"}
+              </DialogTitle>
+              <DialogDescription>
+                {hasPassword
+                  ? "You will be signed out of all other devices."
+                  : "Set a password to enable password-based login."}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              {hasPassword && (
+                <div className="space-y-2">
+                  <Label htmlFor="currentPassword">Current Password</Label>
+                  <Input
+                    id="currentPassword"
+                    type="password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    placeholder="Enter current password"
+                  />
+                </div>
+              )}
               <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
+                <Label htmlFor="newPassword">
+                  {hasPassword ? "New Password" : "Password"}
+                </Label>
                 <Input
-                  id="currentPassword"
+                  id="newPassword"
                   type="password"
-                  value={currentPassword}
-                  onChange={(e) => setCurrentPassword(e.target.value)}
-                  placeholder="Enter current password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder={
+                    hasPassword ? "Enter new password" : "Enter password"
+                  }
                 />
               </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">
-                {hasPassword ? "New Password" : "Password"}
-              </Label>
-              <Input
-                id="newPassword"
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                placeholder={
-                  hasPassword ? "Enter new password" : "Enter password"
-                }
-              />
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">
+                  {hasPassword ? "Confirm New Password" : "Confirm Password"}
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder={
+                    hasPassword ? "Confirm new password" : "Confirm password"
+                  }
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">
-                {hasPassword ? "Confirm New Password" : "Confirm Password"}
-              </Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={
-                  hasPassword ? "Confirm new password" : "Confirm password"
-                }
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button onClick={handlePasswordChange} disabled={isLoading}>
-              {isLoading ? (
-                <Spinner className="size-4" />
-              ) : hasPassword ? (
-                "Update Password"
-              ) : (
-                "Set Password"
-              )}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <Spinner className="size-4" />
+                ) : hasPassword ? (
+                  "Update Password"
+                ) : (
+                  "Set Password"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
