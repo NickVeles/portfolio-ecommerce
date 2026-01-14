@@ -207,7 +207,7 @@ export function ReverificationDialog({
             disabled={isLoading}
             onComplete={onVerify}
           >
-            <InputOTPGroup>
+            <InputOTPGroup className="*:text-xl *:size-10 *:sm:size-12">
               <InputOTPSlot index={0} />
               <InputOTPSlot index={1} />
               <InputOTPSlot index={2} />
@@ -226,13 +226,13 @@ export function ReverificationDialog({
             size="sm"
             onClick={onResend}
             disabled={isLoading}
-            className="text-muted-foreground"
+            className="text-muted-foreground hover:text-secondary"
           >
             Didn't receive a code? Resend
           </Button>
         </div>
 
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex gap-2">
           <Button variant="outline" onClick={onCancel} disabled={isLoading}>
             Cancel
           </Button>
