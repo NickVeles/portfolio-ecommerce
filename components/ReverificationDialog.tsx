@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useSession, useUser, useReverification } from "@clerk/nextjs";
 import { SessionVerificationLevel } from "@clerk/types";
 import {
@@ -18,6 +18,8 @@ import {
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "./ui/spinner";
+
+const RESEND_COOLDOWN_SECONDS = 45;
 
 interface VerificationState {
   level: SessionVerificationLevel | undefined;
@@ -41,11 +43,19 @@ export function useReverificationDialog<T>({
   const { session } = useSession();
   const { user } = useUser();
 
-  const [verificationState, setVerificationState] = useState<VerificationState | null>(null);
+  const [verificationState, setVerificationState] =
+    useState<VerificationState | null>(null);
   const [code, setCode] = useState("");
   const [isPreparing, setIsPreparing] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [resendCooldown, setResendCooldown] = useState(0);
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setTimeout(() => setResendCooldown(resendCooldown - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [resendCooldown]);
 
   const enhancedAction = useReverification(action, {
     onNeedsReverification: ({ level, complete, cancel }) => {
@@ -56,7 +66,9 @@ export function useReverificationDialog<T>({
     },
   });
 
-  const startAndPrepareVerification = async (level: SessionVerificationLevel | undefined) => {
+  const startAndPrepareVerification = async (
+    level: SessionVerificationLevel | undefined
+  ) => {
     setIsPreparing(true);
     setError(null);
     try {
@@ -71,6 +83,7 @@ export function useReverificationDialog<T>({
         strategy: "email_code",
         emailAddressId: emailId,
       });
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError("Failed to send verification code. Please try again.");
       console.error(err);
@@ -90,6 +103,7 @@ export function useReverificationDialog<T>({
         strategy: "email_code",
         emailAddressId: emailId,
       });
+      setResendCooldown(RESEND_COOLDOWN_SECONDS);
     } catch (err) {
       setError("Failed to resend code. Please try again.");
       console.error(err);
@@ -111,7 +125,8 @@ export function useReverificationDialog<T>({
       verificationState?.complete();
       setVerificationState(null);
     } catch (err: any) {
-      const msg = err?.errors?.[0]?.longMessage || "Invalid code. Please try again.";
+      const msg =
+        err?.errors?.[0]?.longMessage || "Invalid code. Please try again.";
       setError(msg);
     } finally {
       setIsVerifying(false);
@@ -153,6 +168,7 @@ export function useReverificationDialog<T>({
     onCancel: handleCancel,
     onResend: handleResend,
     email: user?.primaryEmailAddress?.emailAddress,
+    resendCooldown,
   };
 
   return { execute, dialogProps };
@@ -169,6 +185,7 @@ interface ReverificationDialogProps {
   onCancel: () => void;
   onResend: () => void;
   email?: string;
+  resendCooldown: number;
 }
 
 export function ReverificationDialog({
@@ -182,8 +199,10 @@ export function ReverificationDialog({
   onCancel,
   onResend,
   email,
+  resendCooldown,
 }: ReverificationDialogProps) {
   const isLoading = isPreparing || isVerifying;
+  const canResend = resendCooldown === 0 && !isLoading;
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onCancel()}>
@@ -194,7 +213,9 @@ export function ReverificationDialog({
             {isPreparing ? (
               "Sending verification code..."
             ) : (
-              <>We sent a code to <span className="font-medium">{email}</span></>
+              <>
+                We sent a code to <span className="font-medium">{email}</span>
+              </>
             )}
           </DialogDescription>
         </DialogHeader>
@@ -225,10 +246,12 @@ export function ReverificationDialog({
             variant="link"
             size="sm"
             onClick={onResend}
-            disabled={isLoading}
+            disabled={!canResend}
             className="text-muted-foreground hover:text-secondary"
           >
-            Didn't receive a code? Resend
+            {`Didn't receive a code? Resend${
+              resendCooldown > 0 ? ` (${resendCooldown})` : ""
+            }`}
           </Button>
         </div>
 
