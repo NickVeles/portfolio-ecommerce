@@ -12,9 +12,15 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import Link from "next/link";
 
 export function ClerkUserButton() {
   const { user } = useUser();
+  const isEmailVerified =
+    user?.emailAddresses[0]?.verification.status === "verified";
+  const isEmailPrimary =
+    user?.emailAddresses[0]?.id === user?.primaryEmailAddressId;
+  const showEmailNotice = !isEmailVerified || !isEmailPrimary;
   const { signOut } = useClerk();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -63,8 +69,16 @@ export function ClerkUserButton() {
               <p className="text-sm font-medium truncate">
                 {user.fullName || "User"}
               </p>
-              <p className="text-xs text-muted-foreground truncate">
+              <p className="text-xs text-muted-foreground truncate inline-flex items-center">
                 {user.emailAddresses[0]?.emailAddress}
+                {showEmailNotice && (
+                  <Link
+                    href="/settings"
+                    className="inline text-primary hover:text-secondary underline underline-offset-2"
+                  >
+                    (Verify)
+                  </Link>
+                )}
               </p>
             </div>
           </div>
