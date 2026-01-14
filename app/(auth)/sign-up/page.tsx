@@ -1,4 +1,4 @@
-import { SignUpForm } from "@/components/signup-form"
+import { SignUpForm } from "@/components/SignUpForm"
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 

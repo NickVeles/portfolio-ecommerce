@@ -1,4 +1,4 @@
-import { SignInForm } from "@/components/signin-form";
+import { SignInForm } from "@/components/SignInForm";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 
