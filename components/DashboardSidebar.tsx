@@ -6,6 +6,7 @@ import { ShoppingBag, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useCartStore } from "@/store/cart-store";
 
 const navigationItems = [
   {
@@ -23,9 +24,11 @@ const navigationItems = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { signOut } = useClerk();
+  const clearCart = useCartStore((state) => state.clearCart);
 
   const handleSignOut = () => {
     signOut();
+    clearCart();
   };
 
   return (

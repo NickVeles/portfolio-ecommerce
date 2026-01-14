@@ -12,11 +12,13 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { useCartStore } from "@/store/cart-store";
 
 export function ClerkUserButton() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
+  const clearCart = useCartStore((state) => state.clearCart);
   const [open, setOpen] = useState(false);
 
   if (!user) {
@@ -31,6 +33,7 @@ export function ClerkUserButton() {
   const handleSignOut = () => {
     setOpen(false);
     signOut();
+    clearCart();
   };
 
   const userInitials =
