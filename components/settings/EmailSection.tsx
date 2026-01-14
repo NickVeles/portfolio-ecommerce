@@ -16,11 +16,16 @@ import {
 import { Mail } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
+import CodeDialog from "../CodeDialog";
+import { EmailAddressResource } from "@clerk/types";
 
 export function EmailSection() {
   const { user } = useUser();
   const { session } = useSession();
-  const [showChangeDialog, setShowChangeDialog] = useState(false);
+  const [showEmailChangeDialog, setShowEmailChangeDialog] = useState(false);
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
+  const [newEmailObject, setNewEmailObject] =
+    useState<EmailAddressResource | null>(null);
   const [password, setPassword] = useState("");
   const [newEmail, setNewEmail] = useState("");
   const [confirmEmail, setConfirmEmail] = useState("");
@@ -69,63 +74,100 @@ export function EmailSection() {
 
       // Send verification
       res?.prepareVerification({
-        strategy: "email_link",
-        redirectUrl: "/settings",
+        strategy: "email_code",
       });
+
+      setNewEmailObject(res!);
 
       toast.success(
         "Verification email sent. Please check your inbox to verify your new email."
       );
 
-      setShowChangeDialog(false);
-      setPassword("");
-      setNewEmail("");
-      setConfirmEmail("");
+      setShowEmailChangeDialog(false);
+      setShowCodeDialog(true);
     } catch (error) {
       console.error("Error updating email:", error);
       toast.error("Failed to update email. Check your password and try again.");
-    } finally {
       setIsLoading(false);
+    } finally {
+      setPassword("");
+      setNewEmail("");
+      setConfirmEmail("");
     }
   };
 
-  const handleCancel = async () => {
-    setShowChangeDialog(false);
-    setPassword("");
-    setNewEmail("");
-    setConfirmEmail("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isLoading) {
-      e.preventDefault();
-      handleEmailChange();
-    }
-  };
-
-  const handleCheckVerification = async () => {
+  const handleReverify = async () => {
     try {
-      if (isNewEmailPrimary) return;
+      const res = user?.emailAddresses[0]!;
 
-      // Set new email
-      const addressesNum = user?.emailAddresses.length || 0;
-      const newEmailId = user?.emailAddresses[0]?.id;
-      if (addressesNum > 1 && isNewEmailVerified) {
-        user?.update({ primaryEmailAddressId: newEmailId });
-      }
+      // Send verification
+      res?.prepareVerification({
+        strategy: "email_code",
+      });
+
+      setNewEmailObject(res!);
+
+      toast.success(
+        "Verification email sent. Please check your inbox to verify your new email."
+      );
+
+      setShowCodeDialog(true);
+    } catch (error) {
+      console.error("Error sending verification:", error);
+      toast.error("Failed to send verification.");
+    }
+  };
+
+  const handleVerify = async (code: string) => {
+    try {
+      // Verify through code
+      await newEmailObject?.attemptVerification({ code });
+
+      // Set new primary email
+      user?.update({ primaryEmailAddressId: newEmailObject!.id });
 
       // Reload the user
       await user?.reload();
 
       // Delete all other emails
       user?.emailAddresses
-        .filter((e) => e.id !== newEmailId)
+        .filter((e) => e.id !== newEmailObject!.id)
         .map(async (e) => {
           await e.destroy();
         });
     } catch (error) {
-      console.error("Error checking email verification:", error);
-      toast.error("Failed to check email verification.");
+      console.error("Error updating primary email:", error);
+      toast.error("Fail to verify the email.");
+    } finally {
+      setIsLoading(false);
+      setShowCodeDialog(false);
+    }
+  };
+
+  const handleCancel = async () => {
+    setShowEmailChangeDialog(false);
+    setShowCodeDialog(false);
+    setPassword("");
+    setNewEmail("");
+    setConfirmEmail("");
+    setIsLoading(false);
+
+    try {
+      // Delete all non-primary emails
+      user?.emailAddresses
+        .filter((e) => e.id !== user.primaryEmailAddress?.id)
+        .map(async (e) => {
+          await e.destroy();
+        });
+    } catch (error) {
+      console.error("Error handling cancel event:", error);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !isLoading) {
+      e.preventDefault();
+      handleEmailChange();
     }
   };
 
@@ -146,18 +188,24 @@ export function EmailSection() {
           <p className="text-sm font-medium">Email</p>
           <p className="text-xs text-muted-foreground">{currentEmail}</p>
         </div>
-        <Button variant="outline" onClick={() => setShowChangeDialog(true)}>
+        <Button
+          variant="outline"
+          onClick={() => setShowEmailChangeDialog(true)}
+        >
           Change Email
         </Button>
       </div>
 
       {isNewEmailVerified && !isNewEmailPrimary && (
-        <Button variant="link" onClick={handleCheckVerification}>
+        <Button variant="link" onClick={() => handleReverify}>
           Complete Verification
         </Button>
       )}
 
-      <Dialog open={showChangeDialog} onOpenChange={setShowChangeDialog}>
+      <Dialog
+        open={showEmailChangeDialog}
+        onOpenChange={setShowEmailChangeDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Change Email</DialogTitle>
@@ -215,6 +263,12 @@ export function EmailSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CodeDialog
+        open={showCodeDialog}
+        onOpenChange={handleCancel}
+        onSubmit={handleVerify}
+      />
     </div>
   );
 }
