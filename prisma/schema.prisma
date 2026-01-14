@@ -1,0 +1,158 @@
+// Prisma schema for e-commerce app
+// Integrates with Clerk (auth) and Stripe (payments)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// =============================================================================
+// USER MODEL
+// =============================================================================
+// Links to Clerk authentication via clerkId
+// Stores optional address fields for fast checkout
+
+model User {
+  id        String   @id @default(cuid())
+  clerkId   String   @unique
+  email     String?
+
+  // Optional address for fast checkout
+  firstName  String?
+  lastName   String?
+  phone      String?
+  address    String?
+  city       String?
+  state      String?
+  postalCode String?
+  country    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cart   Cart?
+  orders Order[]
+
+  @@index([email])
+  @@map("users")
+}
+
+// =============================================================================
+// CART MODEL
+// =============================================================================
+// 1:1 relationship with User
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items CartItem[]
+
+  @@map("carts")
+}
+
+// =============================================================================
+// CART ITEM MODEL
+// =============================================================================
+// Many:1 relationship with Cart
+// stripeProductId is a string reference (products live in Stripe)
+// Prices stored in cents to match Stripe format
+
+model CartItem {
+  id              String   @id @default(cuid())
+  cartId          String
+  stripeProductId String
+  productName     String
+  priceInCents    Int
+  imageUrl        String?
+  quantity        Int      @default(1)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  cart Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, stripeProductId])
+  @@index([cartId])
+  @@map("cart_items")
+}
+
+// =============================================================================
+// ORDER STATUS ENUM
+// =============================================================================
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  REFUNDED
+  FAILED
+}
+
+// =============================================================================
+// ORDER MODEL
+// =============================================================================
+// Many:1 relationship with User
+// Shipping address is a snapshot at time of order (immutable)
+// Total stored in cents to match Stripe format
+
+model Order {
+  id                      String      @id @default(cuid())
+  userId                  String
+  stripeCheckoutSessionId String?     @unique
+  stripePaymentIntentId   String?     @unique
+  status                  OrderStatus @default(PENDING)
+
+  // Shipping address snapshot
+  shippingFirstName  String
+  shippingLastName   String
+  shippingEmail      String
+  shippingPhone      String?
+  shippingAddress    String
+  shippingCity       String
+  shippingState      String?
+  shippingPostalCode String
+  shippingCountry    String
+
+  totalInCents Int
+  currency     String @default("eur")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items OrderItem[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("orders")
+}
+
+// =============================================================================
+// ORDER ITEM MODEL
+// =============================================================================
+// Many:1 relationship with Order
+// Snapshot of product data at purchase time (immutable)
+
+model OrderItem {
+  id              String   @id @default(cuid())
+  orderId         String
+  stripeProductId String
+  productName     String
+  priceInCents    Int
+  quantity        Int
+  imageUrl        String?
+  createdAt       DateTime @default(now())
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([orderId])
+  @@map("order_items")
+}
