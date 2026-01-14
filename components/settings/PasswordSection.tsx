@@ -15,11 +15,14 @@ import {
 } from "@/components/ui/dialog";
 import { Lock, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import CodeDialog from "../CodeDialog";
 
 export function PasswordSection() {
   const { user } = useUser();
   const { session } = useSession();
-  const [showDialog, setShowDialog] = useState(false);
+  const [showPasswordChangeDialog, setShowPasswordChangeDialog] =
+    useState(false);
+  const [showCodeDialog, setShowCodeDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -66,37 +69,75 @@ export function PasswordSection() {
           newPassword,
           signOutOfOtherSessions: true,
         });
-      } else {
-        // Set password for the first time
-        await user?.updatePassword({
-          newPassword,
-          signOutOfOtherSessions: true,
-        });
-      }
 
-      toast.success(
-        hasPassword
-          ? "Password updated successfully"
-          : "Password set successfully"
-      );
-      setShowDialog(false);
-      setCurrentPassword("");
-      setNewPassword("");
-      setConfirmPassword("");
+        // Toast and reset
+        toast.success("Password updated successfully.");
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setIsLoading(false);
+        setShowPasswordChangeDialog(false);
+      } else {
+        const addressId = await user?.primaryEmailAddress?.id;
+
+        if (!addressId) {
+          throw new Error("The primary address or the user is undefined!");
+        }
+
+        // Send verification code
+        await session?.prepareFirstFactorVerification({
+          strategy: "email_code",
+          emailAddressId: addressId,
+        });
+
+        // Toast
+        toast.success("Verification code sent to your email.");
+        setShowPasswordChangeDialog(false);
+        setShowCodeDialog(true);
+      }
     } catch (error) {
+      setIsLoading(false);
+      setShowPasswordChangeDialog(false);
       console.error("Error updating password:", error);
       toast.error(
         hasPassword
           ? "Failed to update password. Check your current password."
-          : "Failed to set password. Please try again."
+          : "Failed to send verification code. Please try again."
       );
+    }
+  };
+
+  const handleVerify = async (code: string) => {
+    try {
+      // Verify through code
+      await session?.attemptFirstFactorVerification({
+        strategy: "email_code",
+        code,
+      });
+
+      // Set new password
+      await user?.updatePassword({
+        newPassword,
+        signOutOfOtherSessions: true,
+      });
+
+      // Toast
+      toast.success("Password updated successfully.");
+    } catch (error) {
+      console.error("Error verifying the code:", error);
+      toast.error("Failed to verify the code.");
     } finally {
       setIsLoading(false);
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setShowCodeDialog(false);
     }
   };
 
   const handleCancel = () => {
-    setShowDialog(false);
+    setShowPasswordChangeDialog(false);
+    setShowCodeDialog(false);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -130,12 +171,18 @@ export function PasswordSection() {
             {hasPassword ? "••••••••••••" : "No password set"}
           </p>
         </div>
-        <Button variant="outline" onClick={() => setShowDialog(true)}>
+        <Button
+          variant="outline"
+          onClick={() => setShowPasswordChangeDialog(true)}
+        >
           {hasPassword ? "Change Password" : "Set Password"}
         </Button>
       </div>
 
-      <Dialog open={showDialog} onOpenChange={setShowDialog}>
+      <Dialog
+        open={showPasswordChangeDialog}
+        onOpenChange={setShowPasswordChangeDialog}
+      >
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
@@ -212,6 +259,12 @@ export function PasswordSection() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CodeDialog
+        open={showCodeDialog}
+        onOpenChange={handleCancel}
+        onSubmit={handleVerify}
+      />
     </div>
   );
 }
