@@ -5,8 +5,10 @@ import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Loader2 } from "lucide-react";
+import { User } from "lucide-react";
 import { toast } from "sonner";
+import { handleClerkError } from "@/lib/clerk";
+import { Spinner } from "../ui/spinner";
 
 export function PersonalInformationSection() {
   const { user } = useUser();
@@ -30,8 +32,7 @@ export function PersonalInformationSection() {
       toast.success("Name updated successfully");
       setIsEditing(false);
     } catch (error) {
-      console.error("Error updating name:", error);
-      toast.error("Failed to update name");
+      handleClerkError(error, "Failed to update name.");
     } finally {
       setIsLoading(false);
     }
@@ -73,11 +74,7 @@ export function PersonalInformationSection() {
             ) : (
               <>
                 <Button onClick={handleUpdate} disabled={isLoading}>
-                  {isLoading ? (
-                    <Loader2 className="size-4 animate-spin" />
-                  ) : (
-                    "Save"
-                  )}
+                  {isLoading ? <Spinner className="size-4" /> : "Save"}
                 </Button>
                 <Button
                   variant="outline"
