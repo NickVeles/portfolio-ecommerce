@@ -33,7 +33,10 @@ export function DeleteAccountSection() {
   const [isLoading, setIsLoading] = useState(false);
 
   const deleteAccount = async () => {
-    await user?.delete();
+    if (!user) {
+      throw new Error("User not available");
+    }
+    await user.delete();
   };
 
   const { execute, dialogProps } = useReverificationDialog({

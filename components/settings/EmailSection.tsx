@@ -57,22 +57,30 @@ export function EmailSection() {
   };
 
   const createEmailAddress = async () => {
+    if (!user) {
+      throw new Error("User not available");
+    }
+
     // Remove non-primary email addresses
     await Promise.all(
-      user?.emailAddresses
-        .filter((e) => e.id !== user?.primaryEmailAddress?.id)
-        .map((e) => e.destroy()) || []
+      user.emailAddresses
+        .filter((e) => e.id !== user.primaryEmailAddress?.id)
+        .map((e) => e.destroy())
     );
 
     // Create new email
-    const res = await user?.createEmailAddress({ email: newEmail.trim() });
+    const res = await user.createEmailAddress({ email: newEmail.trim() });
+
+    if (!res) {
+      throw new Error("Failed to create email address");
+    }
 
     // Send verification
-    res?.prepareVerification({
+    await res.prepareVerification({
       strategy: "email_code",
     });
 
-    setNewEmailObject(res!);
+    setNewEmailObject(res);
     setResendCooldown(RESEND_COOLDOWN_SECONDS);
 
     toast.success(
@@ -111,17 +119,21 @@ export function EmailSection() {
   });
 
   const setPrimaryEmail = async () => {
+    if (!user || !newEmailObject) {
+      throw new Error("User or email address not available");
+    }
+
     // Set new primary email
-    await user?.update({ primaryEmailAddressId: newEmailObject!.id });
+    await user.update({ primaryEmailAddressId: newEmailObject.id });
 
     // Reload the user
-    await user?.reload();
+    await user.reload();
 
     // Delete non-primary email addresses if present
     await Promise.all(
-      user?.emailAddresses
-        .filter((e) => e.id !== newEmailObject!.id)
-        .map((e) => e.destroy()) || []
+      user.emailAddresses
+        .filter((e) => e.id !== newEmailObject.id)
+        .map((e) => e.destroy())
     );
   };
 
@@ -145,7 +157,8 @@ export function EmailSection() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (!newEmail.trim() || !newEmail.includes("@")) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!newEmail.trim() || !emailRegex.test(newEmail.trim())) {
       toast.error("Please enter a valid email address");
       return;
     }
