@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSession, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,16 +13,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Lock, Loader2 } from "lucide-react";
+import { Lock } from "lucide-react";
 import { toast } from "sonner";
-import CodeDialog from "../CodeDialog";
+import { handleClerkError } from "@/lib/clerk";
+import {
+  ReverificationDialog,
+  useReverificationDialog,
+} from "../ReverificationDialog";
+import { Spinner } from "../ui/spinner";
+
+const MIN_PASSWORD_LENGTH = 8;
 
 export function PasswordSection() {
   const { user } = useUser();
-  const { session } = useSession();
   const [showPasswordChangeDialog, setShowPasswordChangeDialog] =
     useState(false);
-  const [showCodeDialog, setShowCodeDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -30,6 +35,38 @@ export function PasswordSection() {
 
   // Check if user has a password set (users who signed up with OAuth may not have one)
   const hasPassword = user?.passwordEnabled ?? false;
+
+  const updatePassword = async () => {
+    if (hasPassword) {
+      await user?.updatePassword({
+        currentPassword,
+        newPassword,
+        signOutOfOtherSessions: true,
+      });
+    } else {
+      await user?.updatePassword({
+        newPassword,
+        signOutOfOtherSessions: true,
+      });
+    }
+  };
+
+  const { execute, dialogProps } = useReverificationDialog({
+    action: updatePassword,
+    onSuccess: () => {
+      toast.success("Password updated successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    },
+    onError: (error) => {
+      toast.error("Failed to update password");
+      console.error(error);
+    },
+    onCancel: () => {
+      toast.info("Password change cancelled");
+    },
+  });
 
   const handlePasswordChange = async () => {
     // Validate required fields based on whether user has existing password
@@ -48,106 +85,33 @@ export function PasswordSection() {
       return;
     }
 
-    if (newPassword.length < 8) {
-      toast.error("Password must be at least 8 characters long");
+    if (newPassword.length < MIN_PASSWORD_LENGTH) {
+      toast.error(
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`
+      );
       return;
     }
 
     setIsLoading(true);
     try {
-      if (hasPassword) {
-        // Verify user through password
-        await session?.startVerification({ level: "first_factor" });
-        await session?.attemptFirstFactorVerification({
-          strategy: "password",
-          password: currentPassword,
-        });
-
-        // Update existing password
-        await user?.updatePassword({
-          currentPassword,
-          newPassword,
-          signOutOfOtherSessions: true,
-        });
-
-        // Toast and reset
-        toast.success("Password updated successfully.");
-        setCurrentPassword("");
-        setNewPassword("");
-        setConfirmPassword("");
-        setIsLoading(false);
-        setShowPasswordChangeDialog(false);
-      } else {
-        const addressId = await user?.primaryEmailAddress?.id;
-
-        if (!addressId) {
-          throw new Error("The primary address or the user is undefined!");
-        }
-
-        // Send verification code
-        await session?.prepareFirstFactorVerification({
-          strategy: "email_code",
-          emailAddressId: addressId,
-        });
-
-        // Toast
-        toast.success("Verification code sent to your email.");
-        setShowPasswordChangeDialog(false);
-        setShowCodeDialog(true);
-      }
-    } catch (error) {
-      setIsLoading(false);
-      setShowPasswordChangeDialog(false);
-      console.error("Error updating password:", error);
-      toast.error(
-        hasPassword
-          ? "Failed to update password. Check your current password."
-          : "Failed to send verification code. Please try again."
-      );
-    }
-  };
-
-  const handleVerify = async (code: string) => {
-    try {
-      // Verify through code
-      await session?.attemptFirstFactorVerification({
-        strategy: "email_code",
-        code,
-      });
-
-      // Set new password
-      await user?.updatePassword({
-        newPassword,
-        signOutOfOtherSessions: true,
-      });
-
-      // Toast
+      await execute();
       toast.success("Password updated successfully.");
+      setShowPasswordChangeDialog(false);
     } catch (error) {
-      console.error("Error verifying the code:", error);
-      toast.error("Failed to verify the code.");
+      handleClerkError(error, "Failed to update password.");
     } finally {
       setIsLoading(false);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setShowCodeDialog(false);
     }
   };
 
   const handleCancel = () => {
     setShowPasswordChangeDialog(false);
-    setShowCodeDialog(false);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isLoading) {
-      e.preventDefault();
-      handlePasswordChange();
-    }
   };
 
   return (
@@ -203,7 +167,6 @@ export function PasswordSection() {
                   type="password"
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  onKeyDown={handleKeyDown}
                   placeholder="Enter current password"
                 />
               </div>
@@ -217,7 +180,6 @@ export function PasswordSection() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder={
                   hasPassword ? "Enter new password" : "Enter password"
                 }
@@ -232,7 +194,6 @@ export function PasswordSection() {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
                 placeholder={
                   hasPassword ? "Confirm new password" : "Confirm password"
                 }
@@ -249,7 +210,7 @@ export function PasswordSection() {
             </Button>
             <Button onClick={handlePasswordChange} disabled={isLoading}>
               {isLoading ? (
-                <Loader2 className="size-4 animate-spin" />
+                <Spinner className="size-4" />
               ) : hasPassword ? (
                 "Update Password"
               ) : (
@@ -260,11 +221,7 @@ export function PasswordSection() {
         </DialogContent>
       </Dialog>
 
-      <CodeDialog
-        open={showCodeDialog}
-        onOpenChange={handleCancel}
-        onSubmit={handleVerify}
-      />
+      <ReverificationDialog {...dialogProps} />
     </div>
   );
 }
