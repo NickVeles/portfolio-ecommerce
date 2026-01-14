@@ -26,8 +26,7 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export function PasswordSection() {
   const { user } = useUser();
-  const [showPasswordChangeDialog, setShowPasswordChangeDialog] =
-    useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -98,7 +97,7 @@ export function PasswordSection() {
     try {
       await execute();
       toast.success("Password updated successfully.");
-      setShowPasswordChangeDialog(false);
+      setShowDialog(false);
     } catch (error) {
       handleClerkError(error, "Failed to update password.");
     } finally {
@@ -110,7 +109,7 @@ export function PasswordSection() {
   };
 
   const handleCancel = () => {
-    setShowPasswordChangeDialog(false);
+    setShowDialog(false);
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
@@ -137,18 +136,12 @@ export function PasswordSection() {
             {hasPassword ? "••••••••••••" : "No password set"}
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowPasswordChangeDialog(true)}
-        >
+        <Button variant="outline" onClick={() => setShowDialog(true)}>
           {hasPassword ? "Change Password" : "Set Password"}
         </Button>
       </div>
 
-      <Dialog
-        open={showPasswordChangeDialog}
-        onOpenChange={setShowPasswordChangeDialog}
-      >
+      <Dialog open={showDialog} onOpenChange={setShowDialog}>
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <DialogHeader>
