@@ -18,6 +18,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Google } from "./Icons";
+import { handleClerkError } from "@/lib/clerk";
 
 export function SignInForm({
   className,
@@ -48,10 +49,8 @@ export function SignInForm({
         console.error("Sign in status:", signInAttempt.status);
         toast.error("Sign in failed. Please try again.");
       }
-    } catch (err: any) {
-      console.error("Sign in error:", err);
-      const errorMessage = err.errors?.[0]?.message || "Invalid email or password";
-      toast.error(errorMessage);
+    } catch (err) {
+      handleClerkError(err, "Invalid email or password");
     } finally {
       setIsLoading(false);
     }
@@ -68,9 +67,8 @@ export function SignInForm({
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
       });
-    } catch (err: any) {
-      console.error("Google sign in error:", err);
-      toast.error("Failed to sign in with Google");
+    } catch (err) {
+      handleClerkError(err, "Failed to sign in with Google");
       setIsLoading(false);
     }
   };

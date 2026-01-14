@@ -21,6 +21,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Google } from "./Icons";
+import { handleClerkError } from "@/lib/clerk";
 
 export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -62,11 +63,8 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       setVerifying(true);
       toast.success("Verification code sent to your email");
-    } catch (err: any) {
-      console.error("Sign up error:", err);
-      const errorMessage =
-        err.errors?.[0]?.message || "Failed to create account";
-      toast.error(errorMessage);
+    } catch (err) {
+      handleClerkError(err, "Failed to create account");
     } finally {
       setIsLoading(false);
     }
@@ -90,11 +88,8 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
         console.error("Sign up status:", completeSignUp.status);
         toast.error("Verification failed. Please try again.");
       }
-    } catch (err: any) {
-      console.error("Verification error:", err);
-      const errorMessage =
-        err.errors?.[0]?.message || "Invalid verification code";
-      toast.error(errorMessage);
+    } catch (err) {
+      handleClerkError(err, "Invalid verification code");
     } finally {
       setIsLoading(false);
     }
@@ -111,9 +106,8 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
         redirectUrl: "/sso-callback",
         redirectUrlComplete: "/",
       });
-    } catch (err: any) {
-      console.error("Google sign up error:", err);
-      toast.error("Failed to sign up with Google");
+    } catch (err) {
+      handleClerkError(err, "Failed to sign up with Google");
       setIsLoading(false);
     }
   };
