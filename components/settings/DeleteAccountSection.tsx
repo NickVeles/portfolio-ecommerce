@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useSession, useUser } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,59 +17,63 @@ import {
 import { AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Spinner } from "../ui/spinner";
+import { handleClerkError } from "@/lib/clerk";
+import {
+  ReverificationDialog,
+  useReverificationDialog,
+} from "../ReverificationDialog";
+
+const CONFIRMATION_TEXT = "DELETE";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
-  const { session } = useSession();
   const router = useRouter();
   const [showDialog, setShowDialog] = useState(false);
-  const [password, setPassword] = useState("");
+  const [confirmationInput, setConfirmationInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleDelete = async () => {
-    if (!password) {
-      toast.error("Please enter your password");
+  const deleteAccount = async () => {
+    await user?.delete();
+  };
+
+  const { execute, dialogProps } = useReverificationDialog({
+    action: deleteAccount,
+    onSuccess: () => {
+      toast.success("Account deleted successfully");
+      router.push("/");
+    },
+    onError: (error) => {
+      toast.error("Failed to delete account");
+      console.error(error);
+    },
+    onCancel: () => {
+      toast.info("Account deletion cancelled");
+    },
+  });
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (confirmationInput !== CONFIRMATION_TEXT) {
+      toast.error(`Please type ${CONFIRMATION_TEXT} to confirm`);
       return;
     }
 
     setIsLoading(true);
     try {
-      // Verify user through password
-      await session?.startVerification({ level: "first_factor" });
-      await session?.attemptFirstFactorVerification({
-        strategy: "password",
-        password,
-      });
-
-      // Verify password before deletion
-      await user?.updatePassword({
-        currentPassword: password,
-        newPassword: password,
-      });
-
-      // If password is correct, proceed with deletion
-      await user?.delete();
-      toast.success("Account deleted successfully");
-
-      // Redirect to home page
-      router.push("/");
+      await execute();
+      setShowDialog(false);
     } catch (error) {
-      console.error("Error deleting account:", error);
-      toast.error("Failed to delete account. Please check your password.");
+      handleClerkError(error, "Failed to delete account.");
+    } finally {
       setIsLoading(false);
+      setConfirmationInput("");
     }
   };
 
   const handleCancel = () => {
     setShowDialog(false);
-    setPassword("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !isLoading && password) {
-      e.preventDefault();
-      handleDelete();
-    }
+    setConfirmationInput("");
   };
 
   return (
@@ -97,50 +101,57 @@ export function DeleteAccountSection() {
         open={showDialog}
         onOpenChange={(value) => {
           setShowDialog(value);
-          setPassword("");
+          setConfirmationInput("");
         }}
       >
         <DialogContent>
-          <DialogHeader>
-            <DialogTitle className="text-destructive">
-              Delete Account
-            </DialogTitle>
-            <DialogDescription>
-              Enter your password to permanently delete your account. If you
-              don't have a password, set it in the password section first.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="Enter your password"
-              />
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle className="text-destructive">
+                Delete Account
+              </DialogTitle>
+              <DialogDescription>
+                This action cannot be undone. Type{" "}
+                <span className="font-mono font-semibold">
+                  {CONFIRMATION_TEXT}
+                </span>{" "}
+                to permanently delete your account.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="confirmationInput">Confirmation</Label>
+                <Input
+                  id="confirmationInput"
+                  type="text"
+                  value={confirmationInput}
+                  onChange={(e) => setConfirmationInput(e.target.value)}
+                  placeholder={`Type ${CONFIRMATION_TEXT} to confirm`}
+                />
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={handleCancel}
-              disabled={isLoading}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isLoading || !password}
-            >
-              {isLoading ? <Spinner className="size-4" /> : "Delete Account"}
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={isLoading || confirmationInput !== CONFIRMATION_TEXT}
+              >
+                {isLoading ? <Spinner className="size-4" /> : "Delete Account"}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
+
+      <ReverificationDialog {...dialogProps} />
     </>
   );
 }
