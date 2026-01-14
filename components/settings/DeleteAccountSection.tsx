@@ -22,12 +22,14 @@ import {
   ReverificationDialog,
   useReverificationDialog,
 } from "../ReverificationDialog";
+import { useCartStore } from "@/store/cart-store";
 
 const CONFIRMATION_TEXT = "DELETE";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
   const router = useRouter();
+  const clearCart = useCartStore((state) => state.clearCart);
   const [showDialog, setShowDialog] = useState(false);
   const [confirmationInput, setConfirmationInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,6 +45,11 @@ export function DeleteAccountSection() {
     action: deleteAccount,
     onSuccess: () => {
       toast.success("Account deleted successfully");
+
+      // Empty cart
+      clearCart();
+
+      // Go to Home
       router.push("/");
     },
     onError: (error) => {
