@@ -243,7 +243,7 @@ export const useCartStore = create<CartStore>()(
           const data = await response.json();
           const serverItems: CartItem[] = data.items || [];
 
-          // Merge: combine items, preferring higher quantities
+          // Merge: combine items by adding quantities
           const mergedMap = new Map<string, CartItem>();
 
           // Add server items first
@@ -255,31 +255,47 @@ export const useCartStore = create<CartStore>()(
           for (const localItem of localItems) {
             const existing = mergedMap.get(localItem.id);
             if (existing) {
-              // Keep the higher quantity between local and server
+              // Add quantities together
               mergedMap.set(localItem.id, {
                 ...existing,
-                quantity: Math.max(existing.quantity, localItem.quantity),
+                quantity: existing.quantity + localItem.quantity,
               });
             } else {
               mergedMap.set(localItem.id, localItem);
             }
           }
 
-          // Convert map to array and enforce max quantity
+          // Convert map to array and enforce max quantity limit
           let mergedItems = Array.from(mergedMap.values());
-          const totalQuantity = mergedItems.reduce(
+          let totalQuantity = mergedItems.reduce(
             (sum, item) => sum + item.quantity,
             0
           );
 
           // If over limit, scale down proportionally
           if (totalQuantity > MAX_CART_QUANTITY) {
-            const scale = MAX_CART_QUANTITY / totalQuantity;
+            toast.warning(MAX_CART_QUANTITY_WARNING);
+
+            // First, cap each individual item's quantity
             mergedItems = mergedItems.map((item) => ({
               ...item,
-              quantity: Math.max(1, Math.floor(item.quantity * scale)),
+              quantity: Math.min(item.quantity, MAX_CART_QUANTITY),
             }));
-            toast.warning(MAX_CART_QUANTITY_WARNING);
+
+            // Recalculate total after capping individuals
+            totalQuantity = mergedItems.reduce(
+              (sum, item) => sum + item.quantity,
+              0
+            );
+
+            // If still over, scale down proportionally
+            if (totalQuantity > MAX_CART_QUANTITY) {
+              const scale = MAX_CART_QUANTITY / totalQuantity;
+              mergedItems = mergedItems.map((item) => ({
+                ...item,
+                quantity: Math.max(1, Math.floor(item.quantity * scale)),
+              }));
+            }
           }
 
           // Update local state
