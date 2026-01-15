@@ -54,14 +54,7 @@ export const useCartStore = create<CartStore>()(
       isSyncing: false,
       isAuthenticated: false,
       setSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
-      setAuthenticated: (isAuthenticated) => {
-        // Cancel any pending sync when logging out
-        if (!isAuthenticated && syncTimeout) {
-          clearTimeout(syncTimeout);
-          syncTimeout = null;
-        }
-        set({ isAuthenticated });
-      },
+      setAuthenticated: (isAuthenticated) => set({ isAuthenticated }),
 
       addItem: (item) => {
         set((state) => {
@@ -183,9 +176,8 @@ export const useCartStore = create<CartStore>()(
 
       // Sync current cart state to server
       syncToServer: async () => {
-        const { items, isSyncing, isAuthenticated } = get();
-        // Skip if not authenticated (user logged out) or already syncing
-        if (!isAuthenticated || isSyncing) return;
+        const { items, isSyncing } = get();
+        if (isSyncing) return;
 
         set({ isSyncing: true });
         try {
@@ -195,8 +187,7 @@ export const useCartStore = create<CartStore>()(
             body: JSON.stringify({ items }),
           });
 
-          // 401 is expected if user logged out mid-sync, don't treat as error
-          if (!response.ok && response.status !== 401) {
+          if (!response.ok) {
             throw new Error("Failed to sync cart");
           }
         } catch (error) {
