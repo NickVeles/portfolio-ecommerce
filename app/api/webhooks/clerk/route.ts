@@ -79,6 +79,14 @@ export async function POST(req: Request) {
     const { id } = evt.data;
 
     if (id) {
+      // Delete orders first (OrderItems cascade automatically).
+      // For IRL - there should be a better method to preserve
+      // financial records while keeping the user's privacy
+      await prisma.order.deleteMany({
+        where: { user: { clerkId: id } },
+      });
+
+      // Now delete user (Cart and CartItems cascade automatically)
       await prisma.user.delete({
         where: { clerkId: id },
       });
