@@ -50,6 +50,9 @@ export async function POST(req: Request) {
         email: primaryEmail,
         firstName: first_name,
         lastName: last_name,
+        cart: {
+          create: {},
+        },
       },
     });
 
