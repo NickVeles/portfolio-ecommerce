@@ -18,7 +18,7 @@ export function ClerkUserButton() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
-  const clearCart = useCartStore((state) => state.clearCart);
+  const clearCart = useCartStore((state) => state.clearLocalCart);
   const [open, setOpen] = useState(false);
 
   if (!user) {

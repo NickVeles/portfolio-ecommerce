@@ -24,7 +24,7 @@ const navigationItems = [
 export function DashboardSidebar() {
   const pathname = usePathname();
   const { signOut } = useClerk();
-  const clearCart = useCartStore((state) => state.clearCart);
+  const clearCart = useCartStore((state) => state.clearLocalCart);
 
   const handleSignOut = () => {
     signOut();

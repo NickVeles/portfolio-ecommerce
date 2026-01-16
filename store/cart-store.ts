@@ -20,7 +20,7 @@ interface CartStore {
   addItem: (item: CartItem) => void;
   removeItem: (itemId: string) => void;
   updateItemQuantity: (itemId: string, quantity: number) => void;
-  clearCart: () => void;
+  clearLocalCart: () => void;
   getTotalPrice: () => number;
   getTotalQuantity: () => number;
 }
@@ -102,7 +102,7 @@ export const useCartStore = create<CartStore>()(
             ),
           };
         }),
-      clearCart: () => set({ items: [] }),
+      clearLocalCart: () => set({ items: [] }),
       getTotalPrice: () => {
         const state = get();
         return state.items.reduce(

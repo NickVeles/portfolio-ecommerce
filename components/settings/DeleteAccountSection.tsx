@@ -29,7 +29,7 @@ const CONFIRMATION_TEXT = "DELETE";
 export function DeleteAccountSection() {
   const { user } = useUser();
   const router = useRouter();
-  const clearCart = useCartStore((state) => state.clearCart);
+  const clearCart = useCartStore((state) => state.clearLocalCart);
   const [showDialog, setShowDialog] = useState(false);
   const [confirmationInput, setConfirmationInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);

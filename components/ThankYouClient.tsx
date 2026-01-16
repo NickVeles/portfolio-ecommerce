@@ -16,12 +16,12 @@ export default function ThankYouClient({
   firstName,
   location,
 }: ThankYouClientProps) {
-  const { clearCart } = useCartStore();
+  const { clearLocalCart } = useCartStore();
 
   useEffect(() => {
     // Clear cart on successful purchase
-    clearCart();
-  }, [clearCart]);
+    clearLocalCart();
+  }, [clearLocalCart]);
 
   return (
     <div className="container mx-auto py-16">
