@@ -1,4 +1,5 @@
 import CheckoutClient from "@/components/CheckoutClient";
+import { getUserShippingInfo } from "@/lib/user-shipping";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -15,6 +16,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Checkout() {
-  return <CheckoutClient />;
+export default async function Checkout() {
+  const savedShippingInfo = await getUserShippingInfo();
+
+  return <CheckoutClient savedShippingInfo={savedShippingInfo} />;
 }

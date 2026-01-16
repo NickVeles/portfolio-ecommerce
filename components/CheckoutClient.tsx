@@ -4,15 +4,28 @@ import { useCartStore } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import Image from "next/image";
 import Link from "next/link";
 import { slugifyProduct } from "@/lib/utils";
 import processCheckout from "@/lib/process-checkout";
 import { useEffect, useState } from "react";
 import { redirect } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import {
+  ShippingInfo,
+  saveUserShippingInfo,
+  deleteUserShippingInfo,
+} from "@/lib/user-shipping";
 
-export default function CheckoutClient() {
+interface CheckoutClientProps {
+  savedShippingInfo: ShippingInfo | null;
+}
+
+export default function CheckoutClient({ savedShippingInfo }: CheckoutClientProps) {
   const [mounted, setMounted] = useState(false);
+  const [saveShipping, setSaveShipping] = useState(true);
+  const { isSignedIn } = useUser();
   const { items, getTotalPrice } = useCartStore();
   const totalPrice = getTotalPrice();
 
@@ -28,6 +41,31 @@ export default function CheckoutClient() {
     return null;
   }
 
+  const hasSavedShippingInfo =
+    savedShippingInfo?.firstName ||
+    savedShippingInfo?.address ||
+    savedShippingInfo?.city;
+
+  async function handleSubmit(formData: FormData) {
+    if (isSignedIn) {
+      if (saveShipping) {
+        await saveUserShippingInfo({
+          firstName: formData.get("firstName") as string,
+          lastName: formData.get("lastName") as string,
+          phone: formData.get("phone") as string,
+          address: formData.get("address") as string,
+          city: formData.get("city") as string,
+          state: formData.get("state") as string,
+          postalCode: formData.get("postalCode") as string,
+          country: formData.get("country") as string,
+        });
+      } else if (hasSavedShippingInfo) {
+        await deleteUserShippingInfo();
+      }
+    }
+    await processCheckout(formData);
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-8">Checkout</h1>
@@ -36,7 +74,7 @@ export default function CheckoutClient() {
         {/* User Info Form */}
         <div>
           <h2 className="text-xl font-semibold mb-4">Shipping Information</h2>
-          <form action={processCheckout} className="space-y-4">
+          <form action={handleSubmit} className="space-y-4">
             <input type="hidden" name="items" value={JSON.stringify(items)} />
 
             <div className="grid grid-cols-2 gap-4">
@@ -46,6 +84,7 @@ export default function CheckoutClient() {
                   id="firstName"
                   name="firstName"
                   placeholder="John"
+                  defaultValue={savedShippingInfo?.firstName ?? ""}
                   required
                 />
               </div>
@@ -55,6 +94,7 @@ export default function CheckoutClient() {
                   id="lastName"
                   name="lastName"
                   placeholder="Doe"
+                  defaultValue={savedShippingInfo?.lastName ?? ""}
                   required
                 />
               </div>
@@ -67,6 +107,7 @@ export default function CheckoutClient() {
                 name="email"
                 type="email"
                 placeholder="john.doe@example.com"
+                defaultValue={savedShippingInfo?.email ?? ""}
                 required
               />
             </div>
@@ -78,6 +119,7 @@ export default function CheckoutClient() {
                 name="phone"
                 type="tel"
                 placeholder="+1 (555) 000-0000"
+                defaultValue={savedShippingInfo?.phone ?? ""}
                 required
               />
             </div>
@@ -88,6 +130,7 @@ export default function CheckoutClient() {
                 id="address"
                 name="address"
                 placeholder="123 Main St"
+                defaultValue={savedShippingInfo?.address ?? ""}
                 required
               />
             </div>
@@ -95,11 +138,23 @@ export default function CheckoutClient() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
-                <Input id="city" name="city" placeholder="New York" required />
+                <Input
+                  id="city"
+                  name="city"
+                  placeholder="New York"
+                  defaultValue={savedShippingInfo?.city ?? ""}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="state">State/Province</Label>
-                <Input id="state" name="state" placeholder="NY" required />
+                <Input
+                  id="state"
+                  name="state"
+                  placeholder="NY"
+                  defaultValue={savedShippingInfo?.state ?? ""}
+                  required
+                />
               </div>
             </div>
 
@@ -110,6 +165,7 @@ export default function CheckoutClient() {
                   id="postalCode"
                   name="postalCode"
                   placeholder="10001"
+                  defaultValue={savedShippingInfo?.postalCode ?? ""}
                   required
                 />
               </div>
@@ -119,10 +175,24 @@ export default function CheckoutClient() {
                   id="country"
                   name="country"
                   placeholder="United States"
+                  defaultValue={savedShippingInfo?.country ?? ""}
                   required
                 />
               </div>
             </div>
+
+            {isSignedIn && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="saveShipping"
+                  checked={saveShipping}
+                  onCheckedChange={(checked) => setSaveShipping(checked === true)}
+                />
+                <Label htmlFor="saveShipping" className="text-sm font-normal cursor-pointer">
+                  Save shipping information for future orders
+                </Label>
+              </div>
+            )}
 
             <Button type="submit" className="w-full" size="lg">
               Proceed to Payment
