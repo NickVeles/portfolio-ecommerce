@@ -14,12 +14,12 @@ import {
 } from "../ReverificationDialog";
 
 interface GoogleAccountSectionProps {
-  onConnectionChange: (connected: boolean) => void;
+  onConnectionChange?: (connected: boolean) => void;
 }
 
 export function GoogleAccountSection({
   onConnectionChange,
-}: GoogleAccountSectionProps) {
+}: GoogleAccountSectionProps = {}) {
   const { user } = useUser();
   const [isConnected, setIsConnected] = useState(false);
   const [googleEmail, setGoogleEmail] = useState("");
@@ -33,7 +33,7 @@ export function GoogleAccountSection({
       const connected = !!googleAccount;
       setIsConnected(connected);
       setGoogleEmail(googleAccount?.emailAddress || "");
-      onConnectionChange(connected);
+      onConnectionChange?.(connected);
     }
   }, [user, onConnectionChange]);
 
@@ -59,7 +59,7 @@ export function GoogleAccountSection({
       await googleAccount.destroy();
       setIsConnected(false);
       setGoogleEmail("");
-      onConnectionChange(false);
+      onConnectionChange?.(false);
     }
   };
 

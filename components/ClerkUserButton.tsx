@@ -18,7 +18,8 @@ export function ClerkUserButton() {
   const { user } = useUser();
   const { signOut } = useClerk();
   const router = useRouter();
-  const clearCart = useCartStore((state) => state.clearLocalCart);
+  const clearLocalCart = useCartStore((state) => state.clearLocalCart);
+  const setAuthenticated = useCartStore((state) => state.setAuthenticated);
   const [open, setOpen] = useState(false);
 
   if (!user) {
@@ -32,8 +33,9 @@ export function ClerkUserButton() {
 
   const handleSignOut = () => {
     setOpen(false);
+    setAuthenticated(false);
+    clearLocalCart();
     signOut();
-    clearCart();
   };
 
   const userInitials =

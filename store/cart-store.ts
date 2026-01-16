@@ -16,6 +16,8 @@ export interface CartItem {
 interface CartStore {
   items: CartItem[];
   isSheetOpen: boolean;
+  isSyncing: boolean;
+  isAuthenticated: boolean;
   setSheetOpen: (isOpen: boolean) => void;
   addItem: (item: CartItem) => void;
   removeItem: (itemId: string) => void;
@@ -23,6 +25,11 @@ interface CartStore {
   clearLocalCart: () => void;
   getTotalPrice: () => number;
   getTotalQuantity: () => number;
+  setAuthenticated: (isAuth: boolean) => void;
+  setItems: (items: CartItem[]) => void;
+  syncToServer: () => Promise<void>;
+  loadFromServer: () => Promise<CartItem[]>;
+  mergeWithServer: () => Promise<void>;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -30,7 +37,11 @@ export const useCartStore = create<CartStore>()(
     (set, get) => ({
       items: [],
       isSheetOpen: false,
+      isSyncing: false,
+      isAuthenticated: false,
       setSheetOpen: (isOpen) => set({ isSheetOpen: isOpen }),
+      setAuthenticated: (isAuth) => set({ isAuthenticated: isAuth }),
+      setItems: (items) => set({ items }),
       addItem: (item) =>
         set((state) => {
           // Calculate current total quantity in cart
@@ -114,9 +125,71 @@ export const useCartStore = create<CartStore>()(
         const state = get();
         return state.items.reduce((total, item) => total + item.quantity, 0);
       },
+      syncToServer: async () => {
+        const state = get();
+        if (state.isSyncing || !state.isAuthenticated) return;
+
+        set({ isSyncing: true });
+        try {
+          const response = await fetch("/api/cart", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ items: state.items }),
+          });
+
+          if (!response.ok) {
+            throw new Error("Failed to sync cart");
+          }
+        } catch (error) {
+          console.error("Error syncing cart to server:", error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
+      loadFromServer: async () => {
+        try {
+          const response = await fetch("/api/cart");
+          if (!response.ok) {
+            throw new Error("Failed to load cart");
+          }
+          const data = await response.json();
+          return data.items as CartItem[];
+        } catch (error) {
+          console.error("Error loading cart from server:", error);
+          return [];
+        }
+      },
+      mergeWithServer: async () => {
+        const state = get();
+        if (state.isSyncing) return;
+
+        set({ isSyncing: true });
+        try {
+          // Load server cart
+          const serverItems = await get().loadFromServer();
+
+          // Server cart takes priority - replace local cart with server cart
+          set({ items: serverItems });
+
+          // If local cart had items but server was empty, sync local to server
+          if (serverItems.length === 0 && state.items.length > 0) {
+            // Restore local items temporarily for syncing
+            set({ items: state.items, isSyncing: false });
+            await get().syncToServer();
+          }
+        } catch (error) {
+          console.error("Error merging cart with server:", error);
+        } finally {
+          set({ isSyncing: false });
+        }
+      },
     }),
     {
       name: "cart-storage",
+      partialize: (state) => ({
+        items: state.items,
+        isSheetOpen: state.isSheetOpen,
+      }),
     }
   )
 );

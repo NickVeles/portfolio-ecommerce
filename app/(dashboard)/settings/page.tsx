@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { Loader2 } from "lucide-react";
 import { PersonalInformationSection } from "@/components/settings/PersonalInformationSection";
@@ -11,7 +10,6 @@ import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection
 
 export default function Settings() {
   const { isLoaded } = useUser();
-  const [isGoogleConnected, setIsGoogleConnected] = useState(false);
 
   if (!isLoaded) {
     return (
@@ -30,8 +28,8 @@ export default function Settings() {
         </p>
       </div>
       <PersonalInformationSection />
-      <EmailSection isGoogleConnected={isGoogleConnected} />
-      <GoogleAccountSection onConnectionChange={setIsGoogleConnected} />
+      <EmailSection />
+      <GoogleAccountSection />
       <PasswordSection />
       <DeleteAccountSection />
     </div>
