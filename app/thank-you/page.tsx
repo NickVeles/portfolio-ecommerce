@@ -83,8 +83,21 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
       redirect("/");
     }
 
-    // Verify the session belongs to the authenticated user
-    if (session.metadata?.clerkId !== clerkId) {
+    // Get pendingCheckoutId from metadata to verify ownership
+    const pendingCheckoutId = session.metadata?.pendingCheckoutId;
+    if (!pendingCheckoutId) {
+      redirect("/");
+    }
+
+    // Verify the session belongs to the authenticated user via pending checkout
+    const pendingCheckout = await prisma.pendingCheckout.findUnique({
+      where: { id: pendingCheckoutId },
+      include: { items: true },
+    });
+
+    // If pending checkout exists, verify it belongs to this user
+    // (It may have been deleted by the webhook after order creation)
+    if (pendingCheckout && pendingCheckout.clerkId !== clerkId) {
       redirect("/");
     }
 
@@ -116,13 +129,19 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
       );
     }
 
-    // Fallback: order not in database yet, use Stripe metadata
-    const firstName = session.metadata?.shippingFirstName || "Customer";
-    const address = session.metadata?.shippingAddress || "";
-    const city = session.metadata?.shippingCity || "";
-    const location = address && city ? `${address}, ${city}` : "your location";
+    // Fallback: order not in database yet, use pending checkout data
+    if (pendingCheckout) {
+      const location = `${pendingCheckout.shippingAddress}, ${pendingCheckout.shippingCity}`;
+      return (
+        <ThankYouClient
+          firstName={pendingCheckout.shippingFirstName}
+          location={location}
+        />
+      );
+    }
 
-    return <ThankYouClient firstName={firstName} location={location} />;
+    // No order and no pending checkout - something went wrong
+    return <ThankYouClient firstName="Customer" location="your location" />;
   } catch (error) {
     console.error("Error retrieving order:", error);
     redirect("/");

@@ -4,6 +4,14 @@ import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 
+interface PendingCheckoutItem {
+  stripeProductId: string;
+  productName: string;
+  priceInCents: number;
+  quantity: number;
+  imageUrl: string | null;
+}
+
 export async function POST(req: Request) {
   const body = await req.text();
   const headerPayload = await headers();
@@ -17,7 +25,7 @@ export async function POST(req: Request) {
   }
 
   const WEBHOOK_SECRET = process.env.STRIPE_WEBHOOK_SECRET;
-  
+
   if (!WEBHOOK_SECRET) {
     console.error("Missing STRIPE_WEBHOOK_SECRET environment variable");
     return NextResponse.json(
@@ -55,60 +63,39 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(
   session: Stripe.Checkout.Session
 ) {
-  // Get the full session with line items
-  const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-    expand: ["line_items.data.price.product"],
-  });
-
-  const metadata = fullSession.metadata;
+  const metadata = session.metadata;
   if (!metadata) {
     throw new Error("Session metadata is missing");
   }
 
-  // Parse shipping info from metadata
-  const shippingInfo = {
-    firstName: metadata.shippingFirstName || "",
-    lastName: metadata.shippingLastName || "",
-    email: metadata.shippingEmail || "",
-    phone: metadata.shippingPhone || null,
-    address: metadata.shippingAddress || "",
-    city: metadata.shippingCity || "",
-    state: metadata.shippingState || null,
-    postalCode: metadata.shippingPostalCode || "",
-    country: metadata.shippingCountry || "",
-  };
-
-  // Find user by clerkId (stored in metadata)
-  const clerkId = metadata.clerkId;
-  if (!clerkId) {
-    throw new Error("clerkId not found in session metadata");
+  // Get pending checkout from database
+  const pendingCheckoutId = metadata.pendingCheckoutId;
+  if (!pendingCheckoutId) {
+    throw new Error("pendingCheckoutId not found in session metadata");
   }
 
+  const pendingCheckout = await prisma.pendingCheckout.findUnique({
+    where: { id: pendingCheckoutId },
+    include: { items: true },
+  });
+
+  if (!pendingCheckout) {
+    throw new Error(`PendingCheckout not found: ${pendingCheckoutId}`);
+  }
+
+  // Find user by clerkId
   const user = await prisma.user.findUnique({
-    where: { clerkId },
+    where: { clerkId: pendingCheckout.clerkId },
   });
 
   if (!user) {
-    throw new Error(`User not found for clerkId: ${clerkId}`);
+    throw new Error(`User not found for clerkId: ${pendingCheckout.clerkId}`);
   }
 
-  // Parse cart items from metadata
-  const cartItemsJson = metadata.cartItems;
-  if (!cartItemsJson) {
-    throw new Error("cartItems not found in session metadata");
-  }
-
-  const cartItems = JSON.parse(cartItemsJson) as Array<{
-    id: string;
-    name: string;
-    price: number;
-    imageUrl: string | null;
-    quantity: number;
-  }>;
-
-  // Calculate total from cart items (price is in euros, store in cents)
-  const totalInCents = cartItems.reduce(
-    (sum, item) => sum + Math.round(item.price * 100) * item.quantity,
+  // Calculate total from pending checkout items
+  const totalInCents = pendingCheckout.items.reduce(
+    (sum: number, item: PendingCheckoutItem) =>
+      sum + item.priceInCents * item.quantity,
     0
   );
 
@@ -124,22 +111,22 @@ async function handleCheckoutSessionCompleted(
             ? session.payment_intent
             : session.payment_intent?.id || null,
         status: "PROCESSING",
-        shippingFirstName: shippingInfo.firstName,
-        shippingLastName: shippingInfo.lastName,
-        shippingEmail: shippingInfo.email,
-        shippingPhone: shippingInfo.phone,
-        shippingAddress: shippingInfo.address,
-        shippingCity: shippingInfo.city,
-        shippingState: shippingInfo.state,
-        shippingPostalCode: shippingInfo.postalCode,
-        shippingCountry: shippingInfo.country,
+        shippingFirstName: pendingCheckout.shippingFirstName,
+        shippingLastName: pendingCheckout.shippingLastName,
+        shippingEmail: pendingCheckout.shippingEmail,
+        shippingPhone: pendingCheckout.shippingPhone,
+        shippingAddress: pendingCheckout.shippingAddress,
+        shippingCity: pendingCheckout.shippingCity,
+        shippingState: pendingCheckout.shippingState,
+        shippingPostalCode: pendingCheckout.shippingPostalCode,
+        shippingCountry: pendingCheckout.shippingCountry,
         totalInCents,
         currency: session.currency || "eur",
         items: {
-          create: cartItems.map((item) => ({
-            stripeProductId: item.id,
-            productName: item.name,
-            priceInCents: Math.round(item.price * 100),
+          create: pendingCheckout.items.map((item: PendingCheckoutItem) => ({
+            stripeProductId: item.stripeProductId,
+            productName: item.productName,
+            priceInCents: item.priceInCents,
             quantity: item.quantity,
             imageUrl: item.imageUrl,
           })),
@@ -157,6 +144,11 @@ async function handleCheckoutSessionCompleted(
           userId: user.id,
         },
       },
+    });
+
+    // Delete the pending checkout (no longer needed)
+    await tx.pendingCheckout.delete({
+      where: { id: pendingCheckoutId },
     });
 
     return newOrder;

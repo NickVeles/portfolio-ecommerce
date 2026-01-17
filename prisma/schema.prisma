@@ -84,6 +84,53 @@ model CartItem {
 }
 
 // =============================================================================
+// PENDING CHECKOUT MODEL
+// =============================================================================
+// Stores cart data before Stripe checkout
+// Used to avoid Stripe metadata limits (500 chars per value)
+// Deleted after successful order creation
+
+model PendingCheckout {
+  id        String   @id @default(cuid())
+  clerkId   String
+  expiresAt DateTime
+
+  // Shipping address
+  shippingFirstName  String
+  shippingLastName   String
+  shippingEmail      String
+  shippingPhone      String?
+  shippingAddress    String
+  shippingCity       String
+  shippingState      String?
+  shippingPostalCode String
+  shippingCountry    String
+
+  createdAt DateTime              @default(now())
+  items     PendingCheckoutItem[]
+
+  @@index([clerkId])
+  @@index([expiresAt])
+  @@map("pending_checkouts")
+}
+
+model PendingCheckoutItem {
+  id                String @id @default(cuid())
+  pendingCheckoutId String
+
+  stripeProductId String
+  productName     String
+  priceInCents    Int
+  imageUrl        String?
+  quantity        Int
+
+  pendingCheckout PendingCheckout @relation(fields: [pendingCheckoutId], references: [id], onDelete: Cascade)
+
+  @@index([pendingCheckoutId])
+  @@map("pending_checkout_items")
+}
+
+// =============================================================================
 // ORDER STATUS ENUM
 // =============================================================================
 

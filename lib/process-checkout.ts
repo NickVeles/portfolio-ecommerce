@@ -4,6 +4,7 @@ import { CartItem } from "@/store/cart-store";
 import { stripe } from "./stripe";
 import { redirect } from "next/navigation";
 import { auth } from "@clerk/nextjs/server";
+import { prisma } from "./prisma";
 
 export default async function processCheckout(
   formData: FormData
@@ -39,26 +40,40 @@ export default async function processCheckout(
   const postalCode = formData.get("postalCode") as string;
   const country = formData.get("country") as string;
 
+  // Create pending checkout in database (expires in 24 hours)
+  const pendingCheckout = await prisma.pendingCheckout.create({
+    data: {
+      clerkId,
+      expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
+      shippingFirstName: firstName,
+      shippingLastName: lastName,
+      shippingEmail: email,
+      shippingPhone: phone || null,
+      shippingAddress: address,
+      shippingCity: city,
+      shippingState: state || null,
+      shippingPostalCode: postalCode,
+      shippingCountry: country,
+      items: {
+        create: items.map((item) => ({
+          stripeProductId: item.id,
+          productName: item.name,
+          priceInCents: Math.round(item.price * 100),
+          imageUrl: item.imageUrl || null,
+          quantity: item.quantity,
+        })),
+      },
+    },
+  });
+
   const session = await stripe.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items,
     mode: "payment",
-    // Store all data needed for order creation in metadata
+    // Only store the pending checkout ID - all other data is in the database
     metadata: {
-      clerkId,
-      shippingFirstName: firstName,
-      shippingLastName: lastName,
-      shippingEmail: email,
-      shippingPhone: phone,
-      shippingAddress: address,
-      shippingCity: city,
-      shippingState: state,
-      shippingPostalCode: postalCode,
-      shippingCountry: country,
-      // Store cart items for order creation (Stripe metadata has 500 char limit per value)
-      cartItems: JSON.stringify(items),
+      pendingCheckoutId: pendingCheckout.id,
     },
-    // Use Stripe's session_id placeholder - Stripe will replace it with actual session ID
     success_url: `${process.env.NEXT_PUBLIC_BASE_URL}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.NEXT_PUBLIC_BASE_URL}/checkout`,
   });
