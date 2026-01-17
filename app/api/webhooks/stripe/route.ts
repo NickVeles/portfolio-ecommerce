@@ -103,7 +103,7 @@ async function handleCheckoutSessionCompleted(
     // Create the order
     const newOrder = await tx.order.create({
       data: {
-        userId: user?.id,
+        ...(user && { userId: user.id }),
         stripeCheckoutSessionId: session.id,
         stripePaymentIntentId:
           typeof session.payment_intent === "string"
