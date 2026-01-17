@@ -23,7 +23,7 @@ export default async function processCheckout(
         name: item.name,
         images: item.imageUrl ? [item.imageUrl] : [],
       },
-      unit_amount: item.price * 100, //convert to int
+      unit_amount: Math.round(item.price * 100),
     },
     quantity: item.quantity,
   }));
