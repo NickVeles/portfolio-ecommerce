@@ -27,7 +27,7 @@ type ThankYouProps = {
 // Helper to wait and retry for order (webhook might take a moment to process)
 async function waitForOrder(
   sessionId: string,
-  userId: string,
+  clerkId: string | null,
   maxAttempts = 5,
   delayMs = 1000
 ) {
@@ -40,13 +40,16 @@ async function waitForOrder(
       },
     });
 
-    // Only return order if it belongs to the authenticated user
-    if (order && order.user.clerkId === userId) {
-      return order;
-    }
-
-    // If order exists but belongs to different user, don't retry
     if (order) {
+      // For guest orders (no userId), return the order
+      if (!order.userId) {
+        return order;
+      }
+      // For authenticated orders, verify ownership
+      if (clerkId && order.user?.clerkId === clerkId) {
+        return order;
+      }
+      // Order belongs to a different user, don't return it
       return null;
     }
 
@@ -61,11 +64,6 @@ async function waitForOrder(
 
 export default async function ThankYou({ searchParams }: ThankYouProps) {
   const { userId: clerkId } = await auth();
-
-  // Must be authenticated
-  if (!clerkId) {
-    redirect(COMMON_REDIRECT);
-  }
 
   const params = await searchParams;
   const sessionId = params.session_id;
@@ -90,29 +88,41 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
       redirect(COMMON_REDIRECT);
     }
 
-    // Verify the session belongs to the authenticated user via pending checkout
+    // Verify the session belongs to the current user via pending checkout
     const pendingCheckout = await prisma.pendingCheckout.findUnique({
       where: { id: pendingCheckoutId },
       include: { items: true },
     });
 
-    // If pending checkout exists, verify it belongs to this user
-    // (It may have been deleted by the webhook after order creation)
-    if (pendingCheckout && pendingCheckout.clerkId !== clerkId) {
-      redirect(COMMON_REDIRECT);
+    // If pending checkout exists, verify ownership:
+    // - Guest checkout (no clerkId in pending): allow if current user is also guest
+    // - Authenticated checkout: must match current user's clerkId
+    if (pendingCheckout) {
+      const isGuestCheckout = !pendingCheckout.clerkId;
+      const isCurrentUserGuest = !clerkId;
+
+      if (!isGuestCheckout && pendingCheckout.clerkId !== clerkId) {
+        // Authenticated checkout that doesn't belong to current user
+        redirect(COMMON_REDIRECT);
+      }
+      if (isGuestCheckout && !isCurrentUserGuest) {
+        // Guest checkout but user is now logged in - allow it (they may have logged in after)
+        // This is permissive but reasonable UX
+      }
     }
 
     // Try to fetch the order from the database (webhook should have created it)
     const order = await waitForOrder(sessionId, clerkId);
 
-    if (order) {
-      // Order found in database - show full order details
-      const location = `${order.shippingAddress}, ${order.shippingCity}`;
+    const isGuestOrder = order ? !order.userId : !pendingCheckout?.clerkId;
 
+    if (order) {
+      // Order found in database - show order details
+      // Hide personal info for guest orders
       return (
         <ThankYouClient
-          firstName={order.shippingFirstName}
-          location={location}
+          firstName={isGuestOrder ? undefined : order.shippingFirstName}
+          location={isGuestOrder ? undefined : `${order.shippingAddress}, ${order.shippingCity}`}
           order={{
             id: order.id,
             totalInCents: order.totalInCents,
@@ -132,17 +142,17 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
 
     // Fallback: order not in database yet, use pending checkout data
     if (pendingCheckout) {
-      const location = `${pendingCheckout.shippingAddress}, ${pendingCheckout.shippingCity}`;
+      // Hide personal info for guest orders
       return (
         <ThankYouClient
-          firstName={pendingCheckout.shippingFirstName}
-          location={location}
+          firstName={isGuestOrder ? undefined : pendingCheckout.shippingFirstName}
+          location={isGuestOrder ? undefined : `${pendingCheckout.shippingAddress}, ${pendingCheckout.shippingCity}`}
         />
       );
     }
 
     // No order and no pending checkout - something went wrong
-    return <ThankYouClient firstName="Customer" location="your location" />;
+    return <ThankYouClient />;
   } catch (error) {
     console.error("Error retrieving order:", error);
     redirect(COMMON_REDIRECT);

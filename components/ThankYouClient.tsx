@@ -25,8 +25,8 @@ type Order = {
 };
 
 type ThankYouClientProps = {
-  firstName: string;
-  location: string;
+  firstName?: string;
+  location?: string;
   order?: Order;
 };
 
@@ -51,12 +51,12 @@ export default function ThankYouClient({
           </div>
 
           <h1 className="text-3xl font-bold">
-            Thank you for your purchase, {firstName}!
+            Thank you for your purchase{firstName ? `, ${firstName}` : ""}!
           </h1>
 
           <p className="text-xl text-muted-foreground">
-            Your payment has been successful. We&apos;re working to ship your package
-            to {location}.
+            Your payment has been successful.
+            {location && <> We&apos;re working to ship your package to {location}.</>}
           </p>
 
           <div className="pt-8 space-y-4">
