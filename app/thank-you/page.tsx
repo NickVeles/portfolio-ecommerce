@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@clerk/nextjs/server";
 
 export const metadata: Metadata = {
   title: "Thank You",
@@ -23,17 +24,29 @@ type ThankYouProps = {
 };
 
 // Helper to wait and retry for order (webhook might take a moment to process)
-async function waitForOrder(sessionId: string, maxAttempts = 5, delayMs = 1000) {
+async function waitForOrder(
+  sessionId: string,
+  userId: string,
+  maxAttempts = 5,
+  delayMs = 1000
+) {
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const order = await prisma.order.findUnique({
       where: { stripeCheckoutSessionId: sessionId },
       include: {
         items: true,
+        user: true,
       },
     });
 
-    if (order) {
+    // Only return order if it belongs to the authenticated user
+    if (order && order.user.clerkId === userId) {
       return order;
+    }
+
+    // If order exists but belongs to different user, don't retry
+    if (order) {
+      return null;
     }
 
     // Wait before retrying (except on last attempt)
@@ -46,6 +59,13 @@ async function waitForOrder(sessionId: string, maxAttempts = 5, delayMs = 1000) 
 }
 
 export default async function ThankYou({ searchParams }: ThankYouProps) {
+  const { userId: clerkId } = await auth();
+
+  // Must be authenticated
+  if (!clerkId) {
+    redirect("/");
+  }
+
   const params = await searchParams;
   const sessionId = params.session_id;
 
@@ -63,8 +83,13 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
       redirect("/");
     }
 
+    // Verify the session belongs to the authenticated user
+    if (session.metadata?.clerkId !== clerkId) {
+      redirect("/");
+    }
+
     // Try to fetch the order from the database (webhook should have created it)
-    const order = await waitForOrder(sessionId);
+    const order = await waitForOrder(sessionId, clerkId);
 
     if (order) {
       // Order found in database - show full order details
