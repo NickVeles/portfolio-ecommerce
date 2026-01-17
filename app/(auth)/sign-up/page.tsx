@@ -1,6 +1,12 @@
 import { SignUpForm } from "@/components/SignUpForm"
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign Up",
+  description: "Create a new account",
+};
 
 export default async function SignUpPage() {
   const { userId } = await auth();

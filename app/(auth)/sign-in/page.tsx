@@ -1,6 +1,12 @@
 import { SignInForm } from "@/components/SignInForm";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Sign In",
+  description: "Sign in to your account",
+};
 
 export default async function SignInPage() {
   const { userId } = await auth();
