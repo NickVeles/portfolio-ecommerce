@@ -10,7 +10,8 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f",
-    "wh:dev": "ngrok http 3000"
+    "whdev:clerk": "ngrok http 3000",
+    "whdev:stripe": "stripe listen --forward-to localhost:3000/api/webhooks/stripe"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.7",
