@@ -100,37 +100,43 @@ async function handleCheckoutSessionCompleted(
 
   // Create the order with items in a transaction
   const order = await prisma.$transaction(async (tx) => {
-    // Create the order
+    // Build order data - common fields for both guest and authenticated orders
+    const orderItems = {
+      create: pendingCheckout.items.map((item: PendingCheckoutItem) => ({
+        stripeProductId: item.stripeProductId,
+        productName: item.productName,
+        priceInCents: item.priceInCents,
+        quantity: item.quantity,
+        imageUrl: item.imageUrl,
+      })),
+    };
+
+    const baseOrderData = {
+      stripeCheckoutSessionId: session.id,
+      stripePaymentIntentId:
+        typeof session.payment_intent === "string"
+          ? session.payment_intent
+          : session.payment_intent?.id || null,
+      status: "PROCESSING" as const,
+      shippingFirstName: pendingCheckout.shippingFirstName,
+      shippingLastName: pendingCheckout.shippingLastName,
+      shippingEmail: pendingCheckout.shippingEmail,
+      shippingPhone: pendingCheckout.shippingPhone,
+      shippingAddress: pendingCheckout.shippingAddress,
+      shippingCity: pendingCheckout.shippingCity,
+      shippingState: pendingCheckout.shippingState,
+      shippingPostalCode: pendingCheckout.shippingPostalCode,
+      shippingCountry: pendingCheckout.shippingCountry,
+      totalInCents,
+      currency: session.currency || "eur",
+      items: orderItems,
+    };
+
+    // Create order with or without user relation
     const newOrder = await tx.order.create({
-      data: {
-        ...(user && { userId: user.id }),
-        stripeCheckoutSessionId: session.id,
-        stripePaymentIntentId:
-          typeof session.payment_intent === "string"
-            ? session.payment_intent
-            : session.payment_intent?.id || null,
-        status: "PROCESSING",
-        shippingFirstName: pendingCheckout.shippingFirstName,
-        shippingLastName: pendingCheckout.shippingLastName,
-        shippingEmail: pendingCheckout.shippingEmail,
-        shippingPhone: pendingCheckout.shippingPhone,
-        shippingAddress: pendingCheckout.shippingAddress,
-        shippingCity: pendingCheckout.shippingCity,
-        shippingState: pendingCheckout.shippingState,
-        shippingPostalCode: pendingCheckout.shippingPostalCode,
-        shippingCountry: pendingCheckout.shippingCountry,
-        totalInCents,
-        currency: session.currency || "eur",
-        items: {
-          create: pendingCheckout.items.map((item: PendingCheckoutItem) => ({
-            stripeProductId: item.stripeProductId,
-            productName: item.productName,
-            priceInCents: item.priceInCents,
-            quantity: item.quantity,
-            imageUrl: item.imageUrl,
-          })),
-        },
-      },
+      data: user
+        ? { ...baseOrderData, userId: user.id }
+        : baseOrderData,
       include: {
         items: true,
       },
