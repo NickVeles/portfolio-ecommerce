@@ -27,7 +27,7 @@ type OrdersProps = {
 };
 
 function getStatusBadgeVariant(
-  status: OrderStatus
+  status: OrderStatus,
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
     case "DELIVERED":
@@ -99,7 +99,7 @@ export default async function Orders({ searchParams }: OrdersProps) {
   const totalPages = Math.ceil(totalCount / ORDERS_PER_PAGE);
 
   return (
-    <div className="space-y-12">
+    <div className="flex flex-col gap-12 h-full">
       <div>
         <h1 className="text-2xl font-semibold">Order History</h1>
         <p className="text-sm text-muted-foreground mt-1">
@@ -120,8 +120,8 @@ export default async function Orders({ searchParams }: OrdersProps) {
           </Link>
         </div>
       ) : (
-        <>
-          <div className="space-y-4">
+        <div className="flex flex-col gap-6 justify-between flex-1">
+          <div className="space-y-4 flex flex-col">
             {orders.map((order) => {
               const firstItem = order.items[0];
               const additionalItemsCount = order.items.length - 1;
@@ -203,15 +203,23 @@ export default async function Orders({ searchParams }: OrdersProps) {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <Pagination className="mt-8">
+            <Pagination>
               <PaginationContent>
-                {currentPage > 1 && (
-                  <PaginationItem>
-                    <PaginationPrevious
-                      href={`/orders?page=${currentPage - 1}`}
-                    />
-                  </PaginationItem>
-                )}
+                <PaginationItem>
+                  <PaginationPrevious
+                    href={
+                      currentPage > 1
+                        ? `/orders?page=${currentPage - 1}`
+                        : undefined
+                    }
+                    aria-disabled={currentPage === 1}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
@@ -223,18 +231,28 @@ export default async function Orders({ searchParams }: OrdersProps) {
                         {page}
                       </PaginationLink>
                     </PaginationItem>
-                  )
+                  ),
                 )}
 
-                {currentPage < totalPages && (
-                  <PaginationItem>
-                    <PaginationNext href={`/orders?page=${currentPage + 1}`} />
-                  </PaginationItem>
-                )}
+                <PaginationItem>
+                  <PaginationNext
+                    href={
+                      currentPage < totalPages
+                        ? `/orders?page=${currentPage + 1}`
+                        : undefined
+                    }
+                    aria-disabled={currentPage === totalPages}
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : undefined
+                    }
+                  />
+                </PaginationItem>
               </PaginationContent>
             </Pagination>
           )}
-        </>
+        </div>
       )}
     </div>
   );
