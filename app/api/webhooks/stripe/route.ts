@@ -134,7 +134,9 @@ async function handleCheckoutSessionCompleted(
 
     // Create order with or without user relation
     const newOrder = await tx.order.create({
-      data: { ...baseOrderData, userId: user?.id },
+      data: user
+        ? { ...baseOrderData, userId: user.id }
+        : baseOrderData,
       include: { items: true },
     });
 
