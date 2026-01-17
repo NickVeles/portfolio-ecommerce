@@ -2,7 +2,7 @@
 
 A full-stack e-commerce portfolio project built with modern web technologies, featuring secure authentication, payment processing, and order management.
 
-**[Live Demo](https://velbuy.nickveles.com)** | **[About the Developer](https://nickveles.com)**
+**[Live Demo](https://velbuy.vercel.app)** | **[About the Developer](https://nickveles.com)**
 
 ## Features
 
