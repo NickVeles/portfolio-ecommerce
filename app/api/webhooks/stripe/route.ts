@@ -83,13 +83,12 @@ async function handleCheckoutSessionCompleted(
     throw new Error(`PendingCheckout not found: ${pendingCheckoutId}`);
   }
 
-  // Find user by clerkId
-  const user = await prisma.user.findUnique({
-    where: { clerkId: pendingCheckout.clerkId },
-  });
-
-  if (!user) {
-    throw new Error(`User not found for clerkId: ${pendingCheckout.clerkId}`);
+  // Find user by clerkId (optional for guest checkout)
+  let user = null;
+  if (pendingCheckout.clerkId) {
+    user = await prisma.user.findUnique({
+      where: { clerkId: pendingCheckout.clerkId },
+    });
   }
 
   // Calculate total from pending checkout items
@@ -104,7 +103,7 @@ async function handleCheckoutSessionCompleted(
     // Create the order
     const newOrder = await tx.order.create({
       data: {
-        userId: user.id,
+        userId: user?.id,
         stripeCheckoutSessionId: session.id,
         stripePaymentIntentId:
           typeof session.payment_intent === "string"
@@ -137,14 +136,16 @@ async function handleCheckoutSessionCompleted(
       },
     });
 
-    // Clear the user's cart after successful order creation
-    await tx.cartItem.deleteMany({
-      where: {
-        cart: {
-          userId: user.id,
+    // Clear the user's cart after successful order creation (only if user exists)
+    if (user) {
+      await tx.cartItem.deleteMany({
+        where: {
+          cart: {
+            userId: user.id,
+          },
         },
-      },
-    });
+      });
+    }
 
     // Delete the pending checkout (no longer needed)
     await tx.pendingCheckout.delete({
@@ -154,5 +155,5 @@ async function handleCheckoutSessionCompleted(
     return newOrder;
   });
 
-  console.log(`Order created: ${order.id} for user: ${user.id}`);
+  console.log(`Order created: ${order.id}${user ? ` for user: ${user.id}` : " (guest checkout)"}`);
 }

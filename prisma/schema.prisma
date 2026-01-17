@@ -92,7 +92,7 @@ model CartItem {
 
 model PendingCheckout {
   id        String   @id @default(cuid())
-  clerkId   String
+  clerkId   String?
   expiresAt DateTime
 
   // Shipping address
@@ -153,7 +153,7 @@ enum OrderStatus {
 
 model Order {
   id                      String      @id @default(cuid())
-  userId                  String
+  userId                  String?
   stripeCheckoutSessionId String?     @unique
   stripePaymentIntentId   String?     @unique
   status                  OrderStatus @default(PENDING)
@@ -174,7 +174,7 @@ model Order {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  user  User        @relation(fields: [userId], references: [id], onDelete: Restrict)
+  user  User?       @relation(fields: [userId], references: [id], onDelete: Restrict)
   items OrderItem[]
 
   @@index([userId])

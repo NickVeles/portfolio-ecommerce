@@ -11,10 +11,6 @@ export default async function processCheckout(
 ): Promise<void> {
   const { userId: clerkId } = await auth();
 
-  if (!clerkId) {
-    throw new Error("User must be authenticated to checkout");
-  }
-
   const itemsJson = formData.get("items") as string;
   const items: CartItem[] = JSON.parse(itemsJson);
   const line_items = items.map((item: CartItem) => ({
@@ -43,7 +39,7 @@ export default async function processCheckout(
   // Create pending checkout in database (expires in 24 hours)
   const pendingCheckout = await prisma.pendingCheckout.create({
     data: {
-      clerkId,
+      clerkId: clerkId || null,
       expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000),
       shippingFirstName: firstName,
       shippingLastName: lastName,
