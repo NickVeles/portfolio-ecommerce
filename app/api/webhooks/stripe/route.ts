@@ -133,14 +133,15 @@ async function handleCheckoutSessionCompleted(
     };
 
     // Create order with or without user relation
-    const newOrder = await tx.order.create({
-      data: user
-        ? { ...baseOrderData, userId: user.id }
-        : baseOrderData,
-      include: {
-        items: true,
-      },
-    });
+    const newOrder = user
+      ? await tx.order.create({
+          data: { ...baseOrderData, userId: user.id },
+          include: { items: true },
+        })
+      : await tx.order.create({
+          data: baseOrderData,
+          include: { items: true },
+        });
 
     // Clear the user's cart after successful order creation (only if user exists)
     if (user) {
