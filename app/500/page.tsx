@@ -3,6 +3,7 @@ import { ServerOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import type { Metadata } from "next";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Server Error",
@@ -34,7 +35,7 @@ export default function ServerError() {
               If the problem persists, please contact support.
             </p>
             <Button asChild variant="default">
-              <Link href="/">Go Back Home</Link>
+              <Link href={COMMON_REDIRECT}>Go Back Home</Link>
             </Button>
           </div>
         </CardContent>

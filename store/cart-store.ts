@@ -1,9 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { toast } from "sonner";
-
-const MAX_CART_QUANTITY = 99;
-const MAX_CART_QUANTITY_WARNING = `You can't have more than ${MAX_CART_QUANTITY} items in your cart.`;
+import { MAX_CART_ITEMS, MAX_CART_ITEMS_WARNING } from "@/lib/constants";
 
 export interface CartItem {
   id: string;
@@ -49,12 +47,12 @@ export const useCartStore = create<CartStore>()(
             (sum, i) => sum + i.quantity,
             0
           );
-          const availableSpace = MAX_CART_QUANTITY - currentTotal;
+          const availableSpace = MAX_CART_ITEMS - currentTotal;
 
           // If cart is full, show warning and don't add
           if (availableSpace <= 0) {
             toast.warning(
-              `You can't have more than ${MAX_CART_QUANTITY} items in the cart.`
+              `You can't have more than ${MAX_CART_ITEMS} items in the cart.`
             );
             return state;
           }
@@ -64,7 +62,7 @@ export const useCartStore = create<CartStore>()(
 
           // If we can't add all requested items, show warning
           if (quantityToAdd < item.quantity) {
-            toast.warning(MAX_CART_QUANTITY_WARNING);
+            toast.warning(MAX_CART_ITEMS_WARNING);
           }
 
           const existingItem = state.items.find((i) => i.id === item.id);
@@ -97,14 +95,14 @@ export const useCartStore = create<CartStore>()(
             .filter((i) => i.id !== itemId)
             .reduce((sum, i) => sum + i.quantity, 0);
 
-          const availableSpace = MAX_CART_QUANTITY - otherItemsTotal;
+          const availableSpace = MAX_CART_ITEMS - otherItemsTotal;
 
           // Cap the quantity to available space
           const newQuantity = Math.min(quantity, availableSpace);
 
           // Show warning if we can't set the full requested quantity
           if (newQuantity < quantity) {
-            toast.warning(MAX_CART_QUANTITY_WARNING);
+            toast.warning(MAX_CART_ITEMS_WARNING);
           }
 
           return {

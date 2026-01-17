@@ -4,6 +4,7 @@ import { Button } from "./ui/button";
 import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/cart-store";
+import { MAX_CART_ITEMS } from "@/lib/constants";
 
 interface QuantitySelectorProps {
   productId: string;
@@ -27,7 +28,7 @@ function QuantitySelector({
   };
 
   const handleIncrement = () => {
-    setQuantity((prev) => Math.min(99, prev + 1));
+    setQuantity((prev) => Math.min(MAX_CART_ITEMS, prev + 1));
   };
 
   const handleAddToCart = () => {
@@ -69,7 +70,7 @@ function QuantitySelector({
             className="size-10 rounded-l-none"
             aria-label="Increase quantity"
             onClick={handleIncrement}
-            disabled={quantity >= 99}
+            disabled={quantity >= MAX_CART_ITEMS}
           >
             <Plus className="size-4" />
           </Button>

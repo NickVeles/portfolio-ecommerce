@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Thank You",
@@ -63,7 +64,7 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
 
   // Must be authenticated
   if (!clerkId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   const params = await searchParams;
@@ -71,7 +72,7 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
 
   // Redirect if no session_id is provided
   if (!sessionId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   try {
@@ -80,13 +81,13 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
 
     // Verify the session was successful
     if (session.payment_status !== "paid") {
-      redirect("/");
+      redirect(COMMON_REDIRECT);
     }
 
     // Get pendingCheckoutId from metadata to verify ownership
     const pendingCheckoutId = session.metadata?.pendingCheckoutId;
     if (!pendingCheckoutId) {
-      redirect("/");
+      redirect(COMMON_REDIRECT);
     }
 
     // Verify the session belongs to the authenticated user via pending checkout
@@ -98,7 +99,7 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
     // If pending checkout exists, verify it belongs to this user
     // (It may have been deleted by the webhook after order creation)
     if (pendingCheckout && pendingCheckout.clerkId !== clerkId) {
-      redirect("/");
+      redirect(COMMON_REDIRECT);
     }
 
     // Try to fetch the order from the database (webhook should have created it)
@@ -144,6 +145,6 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
     return <ThankYouClient firstName="Customer" location="your location" />;
   } catch (error) {
     console.error("Error retrieving order:", error);
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 }

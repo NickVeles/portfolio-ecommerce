@@ -22,6 +22,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Google } from "./Icons";
 import { handleClerkError } from "@/lib/clerk";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -83,7 +84,7 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
 
       if (completeSignUp.status === "complete") {
         await setActive({ session: completeSignUp.createdSessionId });
-        router.push("/");
+        router.push(COMMON_REDIRECT);
       } else {
         console.error("Sign up status:", completeSignUp.status);
         toast.error("Verification failed. Please try again.");
@@ -104,7 +105,7 @@ export function SignUpForm({ ...props }: React.ComponentProps<typeof Card>) {
       await signUp.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
+        redirectUrlComplete: COMMON_REDIRECT,
       });
     } catch (err) {
       handleClerkError(err, "Failed to sign up with Google");

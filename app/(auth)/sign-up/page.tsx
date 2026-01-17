@@ -2,6 +2,7 @@ import { SignUpForm } from "@/components/SignUpForm"
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import type { Metadata } from "next";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Sign Up",
@@ -12,7 +13,7 @@ export default async function SignUpPage() {
   const { userId } = await auth();
 
   if (userId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   return (

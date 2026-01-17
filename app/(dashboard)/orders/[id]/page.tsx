@@ -8,6 +8,7 @@ import { OrderItemsList } from "@/components/OrderItemsList";
 import { ArrowLeft } from "lucide-react";
 import type { OrderStatus } from "@prisma/client";
 import type { Metadata } from "next";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Order Details",
@@ -55,7 +56,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   const { id } = await params;
@@ -65,7 +66,7 @@ export default async function OrderPage({ params }: OrderPageProps) {
   });
 
   if (!user) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   const order = await prisma.order.findUnique({

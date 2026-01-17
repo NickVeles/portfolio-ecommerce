@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/input-otp";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "./ui/spinner";
-
-const RESEND_COOLDOWN_SECONDS = 45;
+import { RESEND_COOLDOWN_SECONDS } from "@/lib/constants";
 
 interface VerificationState {
   level: SessionVerificationLevel | undefined;

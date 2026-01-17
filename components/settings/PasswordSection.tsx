@@ -21,8 +21,7 @@ import {
   useReverificationDialog,
 } from "../ReverificationDialog";
 import { Spinner } from "../ui/spinner";
-
-const MIN_PASSWORD_LENGTH = 8;
+import { MIN_PASSWORD_LENGTH } from "@/lib/constants";
 
 export function PasswordSection() {
   const { user } = useUser();

@@ -2,6 +2,7 @@ import { DashboardSidebar } from "@/components/DashboardSidebar";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export default async function DashboardLayout({
   children,
@@ -11,7 +12,7 @@ export default async function DashboardLayout({
   const { userId } = await auth();
 
   if (!userId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   return (

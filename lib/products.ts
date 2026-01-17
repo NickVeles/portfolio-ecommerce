@@ -1,7 +1,6 @@
+import { ITEMS_PER_PAGE } from "./constants";
 import { stripe } from "./stripe";
 import { Stripe } from "stripe";
-
-const ITEMS_PER_PAGE = 12;
 
 interface ProductPaginationResult {
   products: Stripe.Product[];

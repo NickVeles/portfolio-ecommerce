@@ -13,6 +13,7 @@ import {
 import { useCartStore } from "@/store/cart-store";
 import { CartItem } from "./CartItem";
 import { CartSummary } from "./CartSummary";
+import { MAX_CART_ITEMS } from "@/lib/constants";
 
 export function CartSheet() {
   const [mounted, setMounted] = useState(false);
@@ -56,7 +57,7 @@ export function CartSheet() {
               ? "Your cart is empty"
               : `${totalQuantity} ${
                   totalQuantity === 1 ? "item" : "items"
-                } in your cart${totalQuantity >= 99 ? " (MAX)" : ""} `}
+                } in your cart${totalQuantity >= MAX_CART_ITEMS ? " (MAX)" : ""} `}
           </SheetDescription>
         </SheetHeader>
 

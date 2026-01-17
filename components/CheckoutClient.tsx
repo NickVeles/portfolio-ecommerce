@@ -17,6 +17,7 @@ import {
   saveUserShippingInfo,
   deleteUserShippingInfo,
 } from "@/lib/user-shipping";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 interface CheckoutClientProps {
   savedShippingInfo: ShippingInfo | null;
@@ -34,7 +35,7 @@ export default function CheckoutClient({ savedShippingInfo }: CheckoutClientProp
   }, []);
 
   if (totalPrice === 0 || items.length === 0) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   if (!mounted) {

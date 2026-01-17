@@ -23,8 +23,7 @@ import {
   useReverificationDialog,
 } from "../ReverificationDialog";
 import { useCartStore } from "@/store/cart-store";
-
-const CONFIRMATION_TEXT = "DELETE";
+import { CONFIRMATION_TEXT_DELETE_ACCOUNT } from "@/lib/constants";
 
 export function DeleteAccountSection() {
   const { user } = useUser();
@@ -64,8 +63,8 @@ export function DeleteAccountSection() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if (confirmationInput !== CONFIRMATION_TEXT) {
-      toast.error(`Please type ${CONFIRMATION_TEXT} to confirm`);
+    if (confirmationInput !== CONFIRMATION_TEXT_DELETE_ACCOUNT) {
+      toast.error(`Please type ${CONFIRMATION_TEXT_DELETE_ACCOUNT} to confirm`);
       return;
     }
 
@@ -123,7 +122,7 @@ export function DeleteAccountSection() {
               <DialogDescription>
                 This action cannot be undone. Type{" "}
                 <span className="font-mono font-semibold">
-                  {CONFIRMATION_TEXT}
+                  {CONFIRMATION_TEXT_DELETE_ACCOUNT}
                 </span>{" "}
                 to permanently delete your account.
               </DialogDescription>
@@ -136,7 +135,7 @@ export function DeleteAccountSection() {
                   type="text"
                   value={confirmationInput}
                   onChange={(e) => setConfirmationInput(e.target.value)}
-                  placeholder={`Type ${CONFIRMATION_TEXT} to confirm`}
+                  placeholder={`Type ${CONFIRMATION_TEXT_DELETE_ACCOUNT} to confirm`}
                 />
               </div>
             </div>
@@ -152,7 +151,7 @@ export function DeleteAccountSection() {
               <Button
                 type="submit"
                 variant="destructive"
-                disabled={isLoading || confirmationInput !== CONFIRMATION_TEXT}
+                disabled={isLoading || confirmationInput !== CONFIRMATION_TEXT_DELETE_ACCOUNT}
               >
                 {isLoading ? <Spinner className="size-4" /> : "Delete Account"}
               </Button>

@@ -14,13 +14,12 @@ import {
 } from "@/components/ui/pagination";
 import type { OrderStatus } from "@prisma/client";
 import type { Metadata } from "next";
+import { COMMON_REDIRECT, ORDERS_PER_PAGE } from "@/lib/constants";
 
 export const metadata: Metadata = {
   title: "Orders",
   description: "View your order history",
 };
-
-const ORDERS_PER_PAGE = 10;
 
 type OrdersProps = {
   searchParams: Promise<{ page?: string }>;
@@ -65,7 +64,7 @@ export default async function Orders({ searchParams }: OrdersProps) {
   const { userId: clerkId } = await auth();
 
   if (!clerkId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   const params = await searchParams;
@@ -76,7 +75,7 @@ export default async function Orders({ searchParams }: OrdersProps) {
   });
 
   if (!user) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   const [orders, totalCount] = await Promise.all([

@@ -2,12 +2,13 @@ import { AuthenticateWithRedirectCallback } from "@clerk/nextjs";
 import { Spinner } from "@/components/ui/spinner";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export default async function SSOCallback() {
   const { userId } = await auth();
 
   if (userId) {
-    redirect("/");
+    redirect(COMMON_REDIRECT);
   }
 
   return (

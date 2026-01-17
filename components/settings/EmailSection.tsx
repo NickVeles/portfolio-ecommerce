@@ -23,8 +23,7 @@ import {
   useReverificationDialog,
 } from "../ReverificationDialog";
 import { handleClerkError } from "@/lib/clerk";
-
-const RESEND_COOLDOWN_SECONDS = 45;
+import { RESEND_COOLDOWN_SECONDS } from "@/lib/constants";
 
 export function EmailSection() {
   const { user } = useUser();

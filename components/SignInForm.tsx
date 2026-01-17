@@ -19,6 +19,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Google } from "./Icons";
 import { handleClerkError } from "@/lib/clerk";
+import { COMMON_REDIRECT } from "@/lib/constants";
 
 export function SignInForm({
   className,
@@ -65,7 +66,7 @@ export function SignInForm({
       await signIn.authenticateWithRedirect({
         strategy: "oauth_google",
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/",
+        redirectUrlComplete: COMMON_REDIRECT,
       });
     } catch (err) {
       handleClerkError(err, "Failed to sign in with Google");

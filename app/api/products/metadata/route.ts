@@ -1,3 +1,4 @@
+import { ITEMS_PER_PAGE } from "@/lib/constants";
 import { stripe } from "@/lib/stripe";
 import { NextRequest, NextResponse } from "next/server";
 import type { Stripe } from "stripe";
@@ -48,7 +49,6 @@ export async function GET(request: NextRequest) {
       totalCount = filteredProducts.length;
     }
 
-    const ITEMS_PER_PAGE = 12;
     const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
     return NextResponse.json({
