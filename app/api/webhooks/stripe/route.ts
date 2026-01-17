@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { stripe } from "@/lib/stripe";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 interface PendingCheckoutItem {
   stripeProductId: string;
@@ -100,24 +101,14 @@ async function handleCheckoutSessionCompleted(
 
   // Create the order with items in a transaction
   const order = await prisma.$transaction(async (tx) => {
-    // Build order data - common fields for both guest and authenticated orders
-    const orderItems = {
-      create: pendingCheckout.items.map((item: PendingCheckoutItem) => ({
-        stripeProductId: item.stripeProductId,
-        productName: item.productName,
-        priceInCents: item.priceInCents,
-        quantity: item.quantity,
-        imageUrl: item.imageUrl,
-      })),
-    };
-
-    const baseOrderData = {
+    const orderData: Prisma.OrderUncheckedCreateInput = {
+      userId: user?.id ?? null,
       stripeCheckoutSessionId: session.id,
       stripePaymentIntentId:
         typeof session.payment_intent === "string"
           ? session.payment_intent
-          : session.payment_intent?.id || null,
-      status: "PROCESSING" as const,
+          : session.payment_intent?.id ?? null,
+      status: "PROCESSING",
       shippingFirstName: pendingCheckout.shippingFirstName,
       shippingLastName: pendingCheckout.shippingLastName,
       shippingEmail: pendingCheckout.shippingEmail,
@@ -129,14 +120,19 @@ async function handleCheckoutSessionCompleted(
       shippingCountry: pendingCheckout.shippingCountry,
       totalInCents,
       currency: session.currency || "eur",
-      items: orderItems,
+      items: {
+        create: pendingCheckout.items.map((item: PendingCheckoutItem) => ({
+          stripeProductId: item.stripeProductId,
+          productName: item.productName,
+          priceInCents: item.priceInCents,
+          quantity: item.quantity,
+          imageUrl: item.imageUrl,
+        })),
+      },
     };
 
-    // Create order with or without user relation
     const newOrder = await tx.order.create({
-      data: user
-        ? { ...baseOrderData, userId: user.id }
-        : baseOrderData,
+      data: orderData,
       include: { items: true },
     });
 
