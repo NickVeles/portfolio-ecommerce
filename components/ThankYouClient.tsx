@@ -65,7 +65,7 @@ export default function ThankYouClient({
               details and tracking information.
             </p>
             <Button asChild variant="default">
-              <Link href="/products">Go Back to Store</Link>
+              <Link href="/">Go Back to Store</Link>
             </Button>
           </div>
 
