@@ -31,7 +31,7 @@ function getBaseUrl() {
   if (typeof window !== "undefined") return "";
 
   // SSR should use vercel url or localhost
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
+  if (process.env.NEXT_PUBLIC_APP_URL) return `https://${process.env.NEXT_PUBLIC_APP_URL}`;
 
   return `http://localhost:${process.env.PORT ?? 3000}`;
 }
