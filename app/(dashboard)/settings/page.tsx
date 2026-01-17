@@ -1,12 +1,12 @@
 "use client";
 
 import { useUser } from "@clerk/nextjs";
-import { Loader2 } from "lucide-react";
 import { PersonalInformationSection } from "@/components/settings/PersonalInformationSection";
 import { EmailSection } from "@/components/settings/EmailSection";
 import { GoogleAccountSection } from "@/components/settings/GoogleAccountSection";
 import { PasswordSection } from "@/components/settings/PasswordSection";
 import { DeleteAccountSection } from "@/components/settings/DeleteAccountSection";
+import { Spinner } from "@/components/ui/spinner";
 
 export default function Settings() {
   const { isLoaded } = useUser();
@@ -14,7 +14,7 @@ export default function Settings() {
   if (!isLoaded) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        <Spinner className="size-8 text-muted-foreground" />
       </div>
     );
   }
