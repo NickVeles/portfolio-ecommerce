@@ -105,6 +105,7 @@ export default async function ThankYou({ searchParams }: ThankYouProps) {
             currency: order.currency,
             items: order.items.map((item) => ({
               id: item.id,
+              stripeProductId: item.stripeProductId,
               name: item.productName,
               priceInCents: item.priceInCents,
               quantity: item.quantity,
