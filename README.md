@@ -61,9 +61,6 @@ DATABASE_URL=postgresql://user:password@localhost:5432/dbname?schema=public
 # docker for development (optional)
 DATABASE_NAME=dbname
 DATABASE_PASSWORD=password
-
-# Enable demo mode (optional, skips payment step)
-DEMO_MODE=true
 ```
 
 ### Installation
