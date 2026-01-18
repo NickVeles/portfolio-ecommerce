@@ -64,10 +64,10 @@ export function PersonalInformationSection() {
         </p>
       </div>
 
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label htmlFor="firstName">First Name</Label>
-          <div className="flex gap-2">
+      <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">First Name</Label>
             <Input
               id="firstName"
               value={firstName}
@@ -75,36 +75,39 @@ export function PersonalInformationSection() {
               disabled={!isEditing}
               placeholder="First name"
             />
-            {!isEditing ? (
-              <Button variant="outline" onClick={() => setIsEditing(true)}>
-                Edit
-              </Button>
-            ) : (
-              <>
-                <Button onClick={handleUpdate} disabled={isLoading}>
-                  {isLoading ? <Spinner className="size-4" /> : "Save"}
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleCancel}
-                  disabled={isLoading}
-                >
-                  Cancel
-                </Button>
-              </>
-            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              disabled={!isEditing}
+              placeholder="Last name"
+            />
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input
-            id="lastName"
-            value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            disabled={!isEditing}
-            placeholder="Last name"
-          />
+        <div className="flex gap-2">
+          {!isEditing ? (
+            <Button variant="outline" onClick={() => setIsEditing(true)}>
+              Edit
+            </Button>
+          ) : (
+            <>
+              <Button onClick={handleUpdate} disabled={isLoading}>
+                {isLoading ? <Spinner className="size-4" /> : "Save"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </div>

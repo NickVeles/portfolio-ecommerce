@@ -87,7 +87,7 @@ export function PasswordSection() {
 
     if (newPassword.length < MIN_PASSWORD_LENGTH) {
       toast.error(
-        `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`
+        `Password must be at least ${MIN_PASSWORD_LENGTH} characters long`,
       );
       return;
     }
@@ -127,8 +127,8 @@ export function PasswordSection() {
         </p>
       </div>
 
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-4 border rounded-lg">
+        <div className="w-full">
           <p className="text-sm font-medium">Password</p>
           <p className="text-xs text-muted-foreground">
             {hasPassword ? "••••••••••••" : "No password set"}

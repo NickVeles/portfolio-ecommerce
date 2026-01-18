@@ -218,8 +218,8 @@ export function EmailSection() {
         </p>
       </div>
 
-      <div className="flex items-center justify-between p-4 border rounded-lg">
-        <div>
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-4 border rounded-lg">
+        <div className="w-full">
           <p className="text-sm font-medium">Email</p>
           <p className="text-xs text-muted-foreground">{currentEmail}</p>
         </div>

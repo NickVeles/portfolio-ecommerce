@@ -28,7 +28,7 @@ export function GoogleAccountSection({
   useEffect(() => {
     if (user) {
       const googleAccount = user.externalAccounts?.find(
-        (account) => account.provider === "google"
+        (account) => account.provider === "google",
       );
       const connected = !!googleAccount;
       setIsConnected(connected);
@@ -53,7 +53,7 @@ export function GoogleAccountSection({
 
   const disconnectGoogle = async () => {
     const googleAccount = user?.externalAccounts?.find(
-      (account) => account.provider === "google"
+      (account) => account.provider === "google",
     );
     if (googleAccount) {
       await googleAccount.destroy();
@@ -94,7 +94,7 @@ export function GoogleAccountSection({
   const handleDisconnect = async () => {
     if (!hasPassword) {
       toast.error(
-        "You must set a password before disconnecting your Google account."
+        "You must set a password before disconnecting your Google account.",
       );
       return;
     }
@@ -120,8 +120,8 @@ export function GoogleAccountSection({
           </p>
         </div>
 
-        <div className="flex items-center justify-between p-4 border rounded-lg">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-4 border rounded-lg">
+          <div className="w-full flex items-center gap-3">
             {isConnected ? (
               <>
                 <CheckCircle2 className="size-5 text-primary" />
