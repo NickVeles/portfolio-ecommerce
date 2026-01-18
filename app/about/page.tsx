@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function About() {
   return (
-    <div className="container mx-auto py-16">
+    <div className="container mx-auto">
       <Card className="max-w-3xl mx-auto">
         <CardContent className="space-y-8 pt-6">
           <div className="text-center space-y-4">
