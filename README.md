@@ -73,8 +73,6 @@ npm install
 npm run db:up          # Start PostgreSQL with Docker (optional)
 npx prisma migrate dev # Apply migrations
 npx prisma generate    # Generate Prisma client
-npm run whdev:clerk    # Start ngrok for Clerk webhooks
-npm run whdev:stripe   # Start Stripe CLI for Stripe webhooks
 
 # Run the development server
 npm run dev
@@ -147,7 +145,7 @@ For dev, run Stripe in test mode. Use [Stripe test cards](https://docs.stripe.co
 
 ## License
 
-This project is for portfolio and educational purposes.
+This project is for portfolio and educational purposes. See [LICENSE](LICENSE) for details.
 
 ## Author
 
