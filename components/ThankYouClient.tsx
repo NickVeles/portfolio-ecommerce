@@ -43,7 +43,7 @@ export default function ThankYouClient({
   }, [clearLocalCart]);
 
   return (
-    <div className="container mx-auto py-16 px-4">
+    <div className="container mx-auto px-4">
       <Card className="max-w-2xl mx-auto">
         <CardContent className="text-center space-y-6 pt-6">
           <div className="flex justify-center">
