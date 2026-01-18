@@ -32,8 +32,11 @@ A full-stack e-commerce portfolio project built with modern web technologies, fe
 
 - Node.js 18+
 - PostgreSQL database
-- Stripe account (test mode)
-- Clerk account
+- Stripe account (test mode for dev)
+- Clerk account (test mode for dev)
+- ngrok (for local webhook testing)
+- Stripe CLI (for local webhook testing)
+- Docker (optional, for local PostgreSQL)
 
 ### Environment Variables
 
@@ -59,7 +62,7 @@ DATABASE_URL=postgresql://user:password@localhost:5432/dbname?schema=public
 DATABASE_NAME=dbname
 DATABASE_PASSWORD=password
 
-# Other
+# Enable demo mode (optional, skips payment step)
 DEMO_MODE=true
 ```
 
@@ -70,9 +73,11 @@ DEMO_MODE=true
 npm install
 
 # Set up the database
-npm run db:up        # Start PostgreSQL with Docker (optional)
-npx prisma migrate dev
-npx prisma generate
+npm run db:up          # Start PostgreSQL with Docker (optional)
+npx prisma migrate dev # Apply migrations
+npx prisma generate    # Generate Prisma client
+npm run whdev:clerk    # Start ngrok for Clerk webhooks
+npm run whdev:stripe   # Start Stripe CLI for Stripe webhooks
 
 # Run the development server
 npm run dev
@@ -126,7 +131,7 @@ Processes payment events:
 
 ## Testing Payments
 
-This project runs in Stripe test mode. Use [Stripe test cards](https://docs.stripe.com/testing#cards):
+For dev, run Stripe in test mode. Use [Stripe test cards](https://docs.stripe.com/testing#cards):
 
 | Card Number | Description |
 |------------|-------------|
